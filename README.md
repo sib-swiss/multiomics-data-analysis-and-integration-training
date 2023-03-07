@@ -1,33 +1,39 @@
-# Course website template
+# Multiomics Data Analysis and Integration
 
-This website is generated with [MkDocs](https://www.mkdocs.org/), with the theme [Material](https://squidfunk.github.io/mkdocs-material/).
+This course material is part of the "Multiomics Data Analysis and Integration" two-day course of [SIB-training](https://www.sib.swiss/training/who-can-benefit) and is addressed to beginners wanting to become familiar with the multiomics data analysis and integration.
 
-To host it locally, install MkDocs:
-```bash
-pip install mkdocs
-```
+## Overview
 
-and Material:
-```bash
-pip install mkdocs-material
-```
+Researchers often have access or generate multiple omics data (RNAseq, metabolomics, lipidomics, proteomics…) within a single study. Although each omics data has been traditionally analysed in isolation, combining possibly complementary data can yield a better understanding of the mechanisms involved in the biological processes. Several integrative approaches are now available to combine such data, which can be regarded as extensions of the standard Principal Component Analysis (PCA).
+In this 2 days workshop, we will provide an overview of omics data structures, and present different statistical approaches unsupervised and supervised, from simple PCA/PLS to more advanced multi-omics dimension reduction methods (Common Component and Specific Weights Analysis, Multiblock Partial Least Squares). For each method, we will cover both its principle and practical aspects.
 
-Fork this repository and clone it to your local computer. Then, make the repository your current directory and type:
+## Prerequisite
 
-```bash
-mkdocs serve
-```
+### Knowledge / competencies
 
-To host it locally.
+This course is designed for beginner users with the following pre-requisites:
+ - having performed analyses with at least one type of data (RNAseq, metabolomics…).
+ - basic R
+ - basic statistics
+ - Evaluate your R skills with the following self-assesment.
 
-Check it out with your browser at [http://localhost:8000/](http://localhost:8000/).
+### Technical
 
-For an automatically generated github page, you can run:
+You are required to bring your own laptop and have the following installed:
+ - R and RStudio
+ - R packages will be announced to the participants
 
-```sh
-mkdocs gh-deploy
-```
+## Schedule
 
-This will generate a webpage at:
+ - Day 1: PCA/PLS theory and exercise
+ - Day 2: general introduction to multiblock analyses, focus on an unsupervised model (Common Component and Specific Weights Analysis) and a supervised model (Multiblock Partial Least Squares)
 
-https://yourname.github.io/reponame
+## Course material
+
+### Day 1
+ - Slides
+ - Exercices
+
+### Day 2
+ - Slides
+ - Exercices
