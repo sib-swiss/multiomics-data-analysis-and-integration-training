@@ -25,15 +25,16 @@ You are required to bring your own laptop and have the following installed:
 
 ## Schedule
 
- - Day 1: PCA/PLS theory and exercise
- - Day 2: general introduction to multiblock analyses, focus on an unsupervised model (Common Component and Specific Weights Analysis) and a supervised model (Multiblock Partial Least Squares)
+ - Day 1 morning PCA/PLS theory and exercise
+ - Day 1 afternoon PCA/PLS theory and exercise then general introduction to multiblock analyses
+ - Day 2 multiblock analyses theory and exercise
 
 ## Course material
 
 ### Day 1
- - Slides
- - Exercices
+ - [`Slides`](dimensionality_reduction/)
+ - [`Practicals`](dimensionality_reduction/)
 
 ### Day 2
- - Slides
- - Exercices
+ - [`Slides`](multiblock_analyses/Lecture_multiblock_analyses_JulienBoccard.pdf)
+ - [`Practicals`](multiblock_analyses/practicals_multiblock_analyses.pptx)
