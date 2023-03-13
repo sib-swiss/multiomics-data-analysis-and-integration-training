@@ -67,10 +67,10 @@ Friday March 17: S4-S5
 
 ## Course material
 
-### Day 1 - Dimensionality reduction
+#### Day 1 - Dimensionality reduction
  - [`Slides`](dimensionality_reduction/)
  - [`Practicals`](dimensionality_reduction/)
 
-### Day 2 - Multiblock analyses
+#### Day 2 - Multiblock analyses
  - [`Slides`](multiblock_analyses/Lecture_multiblock_analyses_JulienBoccard.pdf)
  - [`Practicals`](multiblock_analyses/practicals_multiblock_analyses.pptx)
