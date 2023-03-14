@@ -74,3 +74,12 @@ Friday March 17: S4-S5
 #### Day 2 - Multiblock analyses
  - [`Slides`](multiblock_analyses/Lecture_multiblock_analyses_JulienBoccard.pdf)
  - [`Practicals`](multiblock_analyses/practicals_multiblock_analyses.pptx)
+ 
+ ## Optional exam  
+ 
+ - [`Exam`](exam/exam.pptx)  
+ - [`Data`](exam/NCI60_dataset_cut.xlsx)
+ 
+ 
+ 
+ 
