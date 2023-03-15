@@ -31,9 +31,7 @@ This course is designed for beginner users with the following pre-requisites:
 
 You are required to bring your own laptop and have the following installed:
  - R and RStudio
- - R packages to install before the training:
-
-install.packages(c("MBAnalysis", "multiblock", "CCA", "mixOmics", "RVAideMemoire", "Factoextra", "ggplot2"))   
+ - R packages to install before the training: 
 
 MBAnalysis (https://cran.r-project.org/web/packages/MBAnalysis/index.html)  
 multiblock (https://cran.r-project.org/web/packages/multiblock/index.html)  
