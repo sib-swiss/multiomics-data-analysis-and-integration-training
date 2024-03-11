@@ -15,7 +15,7 @@ Florence Mehl <Florence.Mehl@sib.swiss> (Trainer)
 
 Van Du Tran <thuong.tran@sib.swiss> (Trainer)	 
 
-Valeria Di Cola  <valeria.dicola@sib.swiss> (Technical Coordinator, SIB training group) 
+Monique Zahn  <monique.zahn@sib.swiss> (Technical Coordinator, SIB training group) 
 
 ## Prerequisite
 
@@ -25,21 +25,14 @@ This course is designed for beginner users with the following pre-requisites:
  - having performed analyses with at least one type of data (RNAseq, metabolomics…).
  - basic R
  - basic statistics
- - Evaluate your R skills with the following self-assesment.
+ - Evaluate your R skills with the [`following self-assesment`](https://docs.google.com/forms/d/e/1FAIpQLSdIyeuabd_ZOWXgI1MWHapmaOMu20L9ESkLDZiWnpmkpujyOg/viewform).
 
 ### Technical
 
 You are required to bring your own laptop and have the following installed:
  - R and RStudio
- - R packages to install before the training: 
-
-MBAnalysis (https://cran.r-project.org/web/packages/MBAnalysis/index.html)  
-multiblock (https://cran.r-project.org/web/packages/multiblock/index.html)  
-CCA (https://cran.r-project.org/web/packages/CCA/index.html)  
-mixOmics (https://www.bioconductor.org/packages/release/bioc/html/mixOmics.html)  
-RVAideMemoire (https://cran.r-project.org/web/packages/RVAideMemoire/index.html)  
-Factoextra (https://cran.r-project.org/web/packages/factoextra/index.html)  
-ggplot2 (https://cran.r-project.org/web/packages/ggplot2/index.html)  
+ - R packages to install before the training:
+   [`packages_installation.R`](multiomics-data-analysis-and-integration-training/blob/master/packages_installation.R)
 
 ## Location 
 
@@ -50,9 +43,9 @@ CMU, Ctre Médical Universitaire
 9 av, de Champel  
 CH-1211 GENEVE 
 
-Thursday 16 March morning room: D60  
-Thursday 16 March Afternoon room: S4-S5  
-Friday March 17: S4-S5  
+Wednesday 13 March room: S3  
+Thursday 14 March 9h - 15h room: D02.1549.a   
+Thursday 14 March 15h - 17h room: A04.3018   
 
 ## Schedule 
 
@@ -66,17 +59,14 @@ Friday March 17: S4-S5
 ## Course material
 
 #### Day 1 - Dimensionality reduction
- - [`Slides`](dimensionality_reduction/Lecture_dimensionality_reduction_VanDuTran.pdf)
- - [`Practicals`](dimensionality_reduction/Dimensionality_reduction.pdf)
+ - [`Introduction`](Day1/Lecture_Introduction_JulienBoccard.pdf)
+ - [`Slides`](Day1/Lecture_dimensionality_reduction_VanDuTran.pdf)
+ - [`Practicals`](Day1/Dimensionality_reduction.pdf)
 
 #### Day 2 - Multiblock analyses
- - [`Slides`](multiblock_analyses/Lecture_multiblock_analyses_JulienBoccard.pdf)
- - [`Practicals`](multiblock_analyses/practicals_multiblock_analyses.pptx)
+ - [`Slides`](Day2/Lecture_multiblock_analyses_JulienBoccard.pdf)
+ - [`Practicals`](Day2/practicals_multiblock_analyses.pptx)
  
- ## Optional exam  
- 
- - [`Exam`](exam/exam.pptx)  
- - [`Data`](exam/NCI60_dataset_cut.xlsx)
  
  
  
