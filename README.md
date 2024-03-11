@@ -50,7 +50,8 @@ Thursday 14 March 15h - 17h room: A04.3018
 ## Schedule 
 
 #### Day 1  
-- 9h-12h30 PCA/PLS theory and exercise  
+- 9h-10h general introduction
+- 10h-12h30 PCA/PLS theory and exercise  
 - 13h30-17h PCA/PLS theory and exercise then general introduction to multiblock analyses
 
 #### Day 2  
