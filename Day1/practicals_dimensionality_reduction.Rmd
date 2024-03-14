@@ -1,0 +1,373 @@
+---
+title: "Dimensionality reduction"
+author: "Van Du Tran"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=TRUE}
+knitr::opts_knit$set(
+    root.dir = '.',
+    keep.tex = TRUE
+);
+knitr::opts_chunk$set(
+    fig.width  = 9,
+    fig.height = 9,
+    fig.align  = 'center',
+    fig.pos    = 'h',
+    fig.show   = 'hold',
+    echo       = TRUE,
+    warning    = FALSE,
+    message    = FALSE,
+    cache      = FALSE
+);
+```
+
+# Exercises
+
+## PCA
+
+#### 1. Load the `nutrimouse` data from the `mixOmics` R package and investigate its structure.
+
+```{r libraries, include=TRUE, eval=TRUE}
+library(mixOmics)
+```
+
+A data object provided by an R package can be loaded with `data`. Its structure can be obainted with `str`, `length`, `dim`, etc.
+
+```{r, include=TRUE, eval=TRUE}
+data("nutrimouse")
+## display the structure of the nutrimouse object
+str(nutrimouse)
+## check dimensions
+lapply(nutrimouse, dim) # apply function dim to each element in list nutrimouse
+lapply(nutrimouse, length) # apply function length to each element in list nutrimouse
+```
+
+#### 2. Take the gene expression dataset in `samples` x `variables` matrix format. Investigate variables' distribution.
+
+```{r, include=TRUE, eval=TRUE}
+## get gene expression data structure
+class(nutrimouse$gene)
+dim(nutrimouse$gene)
+rownames(nutrimouse$gene)[1:10]
+colnames(nutrimouse$gene)[1:10]
+
+## check if there are missing values
+any(is.na(nutrimouse$gene))
+
+## investigate each variable
+summary(nutrimouse$gene[, 1:4])
+colors <- rainbow(20, alpha=1)
+plot(density(scale(nutrimouse$gene[, 1], center=T, scale=F)), 
+     col=colors[1], xlim=c(-0.5,0.5), ylim=c(0,8),
+     main='Density plot of the first 20 genes')
+invisible(sapply(2:20, function(i) {
+    lines(density(scale(nutrimouse$gene[, i], center=T, scale=F)), col=colors[i])
+}))
+```
+
+#### 3. Perform PCA and investigate variances, sample distribution and variable relationship with plots.
+
+A number of methods in different R packages can perform PCA, e.g. `stats::prcomp`, `stats::princomp`, `mixOmics::pca`, `multiblock::pca`, `psych::principal`, `FactoMineR::PCA`, etc.
+
+```{r pca, include=TRUE, eval=TRUE}
+pca.res <- prcomp(nutrimouse$gene, center=TRUE, scale.=F)
+names(pca.res)
+summary(pca.res)
+```
+
+Variances = eigenvalues of the covariance matrix = (standard deviation)\^2.
+
+```{r pca_var, include=TRUE, eval=TRUE}
+variances <- pca.res$sdev^2
+variances
+```
+
+Scree plot: plot of variances.
+
+```{r pca_screeplot, include=TRUE, eval=TRUE}
+screeplot(pca.res, npcs=length(variances), type='lines')
+screeplot(pca.res, npcs=length(variances), type='barplot')
+barplot(variances, xlab='PC', ylab='Variance', names.arg=1:length(variances))
+```
+
+Scree plot on variance percentage.
+
+```{r pca_var_per, include=TRUE, eval=TRUE}
+varPercent <- variances/sum(variances) * 100
+barplot(varPercent, xlab='PC', ylab='Percent Variance', names.arg=1:length(varPercent))
+```
+
+Scores: sample coordinates in the new reference (rotated axes or principal components).
+
+```{r pca_scores, include=TRUE, eval=TRUE}
+scores <- pca.res$x
+str(scores)
+```
+
+Score plot: plot of sample distribution.
+
+```{r pca_score_plot, include=TRUE, eval=TRUE}
+PCx <- "PC1"
+PCy <- "PC2"
+plot(scores[, PCx], scores[, PCy], xlab=PCx, ylab=PCy, pch=16)
+text(scores[, PCx], scores[, PCy]-0.05, rownames(scores), col='blue', cex=0.7)
+```
+
+Loadings: contributions of variables to principal components (eigenvectors of covariance matrix).
+
+```{r pca_loadings, include=TRUE, eval=TRUE}
+loadings <- pca.res$rotation
+str(loadings)
+```
+
+Loading plot: plot of variables' contribution, revealing their relationship.
+
+```{r pca_loading_plot, include=TRUE, eval=TRUE}
+plot(loadings[, PCx], loadings[, PCy], type='n', main="Loadings")
+arrows(0, 0, loadings[, PCx], loadings[, PCy], xlab=PCx, ylab=PCy,
+       length=0.1, angle=20, col=rgb(0,0,1,alpha=apply(loadings[, c(PCx, PCy)], 1, norm, "2")))
+text(loadings[, PCx], loadings[, PCy], rownames(loadings), col='grey', cex=0.7)
+```
+
+Both score and loading plots can be plotted altogether with the `biplot` function.
+
+```{r pca_biplot, include=TRUE, eval=TRUE}
+## biplot
+biplot(pca.res, expand=1, cex=c(0.5, 0.7), col=c("gray50", "red"))
+
+library(factoextra)
+fviz_pca_biplot(pca.res, repel = TRUE,
+                col.var = "blue", # Variables color
+                habillage = nutrimouse$genotype,
+                addEllipses = T,
+                legend="none"
+                )
+```
+
+#### 4. Visually investigate the sample distribution with coloring by metadata or expression of certain genes.
+
+The samples can be colored with some metadata, e.g *genotype* or *diet*,
+
+```{r pca_score_plot_anno1, include=TRUE, eval=TRUE}
+plot(scores[, PCx], scores[, PCy], main="Scores",
+     col=c(1:nlevels(nutrimouse$diet))[nutrimouse$diet],
+     pch=c(17,19)[nutrimouse$genotype],
+     xlab=paste0(PCx,
+                 " (",
+                 round((summary(pca.res)$importance)[2, PCx], 2), ")"),
+     ylab=paste0(PCy,
+                 " (",
+                 round((summary(pca.res)$importance)[2, PCy], 2), ")")
+)
+legend("topright", title="genotype",
+       legend=levels(nutrimouse$genotype),
+       pch=c(17,19), cex=0.7)
+legend("bottomright", title="diet",
+       legend=levels(nutrimouse$diet),
+       col=c(1:5), cex=0.7, pch=16)
+```
+
+or by some gene expression.
+
+```{r pca_score_plot_anno2, include=TRUE, eval=TRUE}
+nbreaks <- 5
+plot(scores[, PCx], scores[, PCy], xlab=PCx, ylab=PCy, 
+     pch=c(17,19)[nutrimouse$genotype], 
+     col=colorRampPalette(c('red','blue'))(nbreaks)[as.numeric(cut(nutrimouse$gene$ALDH3,breaks = nbreaks))])
+```
+
+## PLS
+
+#### 1. Perform PLS (`mixOmics::pls`) between gene and lipid. Investigate its output, sample distribution and variable relationship with plots.
+
+```{r pls, include=TRUE, eval=TRUE}
+pls.res <- pls(X=nutrimouse$gene, Y=nutrimouse$lipid, ncomp=2, scale=TRUE, mode="canonical")
+max(abs(scale(nutrimouse$gene, center=T, scale=T) - pls.res$X))
+max(abs(scale(nutrimouse$lipid, center=T, scale=T) - pls.res$Y))
+```
+
+The sample distribution plot can be performed with **variates**, sample coordinates in the new reference (rotated axes) for each of the two blocks,
+
+```{r pls_score_plot1, include=TRUE, eval=TRUE, fig.show="hold"}
+str(pls.res$variates)
+PCx <- "comp1"
+PCy <- "comp2"
+par(mfrow=c(1,2))
+plot(pls.res$variates$X[, PCx], pls.res$variates$X[, PCy], xlab=PCx, ylab=PCy, main="X", type='n')
+text(pls.res$variates$X[, PCx], pls.res$variates$X[, PCy], rownames(pls.res$variates$X), col='blue', cex=0.6)
+plot(pls.res$variates$Y[, PCx], pls.res$variates$Y[, PCy], xlab=PCx, ylab=PCy, main="Y", type='n')
+text(pls.res$variates$Y[, PCx], pls.res$variates$Y[, PCy], rownames(pls.res$variates$Y), col='blue', cex=0.6)
+```
+
+which is also produced with `plotIndiv`.
+
+```{r pls_score_plot2, include=TRUE, eval=TRUE}
+plotIndiv(pls.res)
+```
+
+Loading plot: plot of variables' contribution in each data block to each variate, after deflating more *important* variates,
+
+```{r pls_loading_plot1, include=TRUE, eval=TRUE, fig.show="hold"}
+par(mfrow=c(1,2), las=2, mar=c(4,8,1,1))
+loadings.ind.X <- order(abs(pls.res$loadings$X[, "comp1"]), decreasing = T)
+barplot(head(pls.res$loadings$X[loadings.ind.X, "comp1"], 10), main="X", horiz = T, cex.names=0.8)
+loadings.ind.Y <- order(abs(pls.res$loadings$Y[, "comp1"]), decreasing = T)
+barplot(head(pls.res$loadings$Y[loadings.ind.Y, "comp1"], 10), main="Y", horiz = T, cex.names=0.8)
+```
+
+which is the same as with `plotLoadings`.
+
+```{r pls_loading_plot2, include=TRUE, eval=TRUE}
+plotLoadings(pls.res, ndisplay = 10)
+```
+
+The plot of variable relationship could be obtained from **loadings.star**.
+
+```{r pls_var_plot, include=TRUE, eval=TRUE}
+names(pls.res$loadings.star) <- c("X", "Y")
+colnames(pls.res$loadings.star$X) <- colnames(pls.res$loadings.star$Y) <- c(PCx, PCy)
+plot(1,1,type='n',
+     xlim=range(c(pls.res$loadings.star$X[, PCx],pls.res$loadings.star$Y[, PCx])), 
+     ylim=range(c(pls.res$loadings.star$X[, PCy],pls.res$loadings.star$Y[, PCy])))
+arrows(0, 0, pls.res$loadings.star$X[, PCx], pls.res$loadings.star$X[, PCy],
+       length=0.1, angle=20, col=rgb(0,0,1,alpha=apply(pls.res$loadings.star$X[, c(PCx, PCy)], 1, norm, "2")))
+text(pls.res$loadings.star$X[, PCx], 
+     pls.res$loadings.star$X[, PCy], 
+     rownames(pls.res$loadings.star$X), col='grey', cex=0.7)
+arrows(0, 0, pls.res$loadings.star$Y[, PCx], pls.res$loadings.star$Y[, PCy],
+       length=0.1, angle=20, col=rgb(1,0,0,alpha=apply(pls.res$loadings.star$Y[, c(PCx, PCy)], 1, norm, "2")))
+text(pls.res$loadings.star$Y[, PCx], 
+     pls.res$loadings.star$Y[, PCy], 
+     rownames(pls.res$loadings.star$Y), col='grey', cex=0.7)
+plotVar(pls.res)
+```
+
+Both sample distribution and variable relationship plot could be done with `biplot` function.
+
+```{r pls_biplot, include=TRUE, eval=TRUE, fig.show="hold"}
+biplot(pls.res, block="X", ind.names.size=3, var.names.size=2)
+biplot(pls.res, block="Y", ind.names.size=3, var.names.size=2)
+```
+
+#### 2. Observe the difference between the two modes *regression* and *canonical* of PLS.
+
+```{r plsregression, include=TRUE, eval=TRUE, fig.show="hold"}
+pls.reg.res <- pls(X=nutrimouse$gene, Y=nutrimouse$lipid, ncomp=2, scale=TRUE, mode="regression")
+pls.can.res <- pls(X=nutrimouse$gene, Y=nutrimouse$lipid, ncomp=2, scale=TRUE, mode="canonical")
+par(mfrow=c(2,2))
+biplot(pls.reg.res, block="X", ind.names.size=3, var.names.size=2)
+biplot(pls.can.res, block="X", ind.names.size=3, var.names.size=2)
+biplot(pls.reg.res, block="Y", ind.names.size=3, var.names.size=2)
+biplot(pls.can.res, block="Y", ind.names.size=3, var.names.size=2)
+```
+
+
+#### 3. Perform PLS-DA (`mixOmics::plsda`) between gene and genotype. Redo PLS-DA using `mixOmics::pls` and compare the results.
+
+```{r plsda, include=TRUE, eval=TRUE, fig.show="hold"}
+pls.da.res <- plsda(X=nutrimouse$gene, Y=nutrimouse$genotype, ncomp=2, scale=TRUE)
+pls.regda.res <- pls(X=nutrimouse$gene, Y=c(0,1)[nutrimouse$genotype], ncomp=2, scale=TRUE, mode="regression")
+par(mfrow=c(1,2))
+biplot(pls.da.res, block="X", ind.names.size=3, var.names.size=2,
+       group=nutrimouse$genotype, col.per.group = c("red", "blue"), legend.title = 'genotype')
+biplot(pls.regda.res, block="X", ind.names.size=3, var.names.size=2,
+       group=nutrimouse$genotype, col.per.group = c("red", "blue"), legend.title = 'genotype')
+```
+
+#### 4. Perform OPLS-DA (`ropls::opls`) between gene and genotype. Investigate its output, sample distribution, variable relationship and predictive performance.
+
+(https://bioconductor.org/packages/release/bioc/vignettes/ropls/inst/doc/ropls-vignette.html)
+
+```{r opls, include=TRUE, eval=TRUE, fig.show="hold"}
+library(ropls)
+opls.res <- opls(x=nutrimouse$gene, y=nutrimouse$genotype, predI=1, orthoI=NA, fig.pdfC='none')
+par(mfrow=c(2,2))
+plot(opls.res, typeVc='x-score')
+plot(opls.res, typeVc='x-loading')
+plot(opls.res, typeVc='overview')
+plot(opls.res, typeVc='correlation')
+
+opls.res <- opls(x=nutrimouse$gene, y=nutrimouse$genotype, predI=1, orthoI=NA, permI=100, fig.pdfC='none')
+plot(opls.res, typeVc='permutation')
+
+opls.res <- opls(x=nutrimouse$gene, y=nutrimouse$genotype, predI=1, orthoI=NA, subset=c(1:13, 21:33), fig.pdfC='none')
+par(mfrow=c(1,2))
+plot(opls.res, typeVc='predict-train')
+plot(opls.res, typeVc='predict-test')
+
+# confusion matrix on training set
+train_id <- getSubsetVi(opls.res)
+table(nutrimouse$genotype[train_id], fitted(opls.res))
+# confusion matrix on test set
+table(nutrimouse$genotype[-train_id], predict(opls.res, nutrimouse$gene[-train_id,]))
+```
+
+## More on CCA
+
+#### 1. Perform CCA (`mixOmics::rcc`) between 20 genes and all lipids. Investigate correlations, sample distribution and variable relationship with plots.
+
+The gene expression data is reduced to 20 genes so that the number of variables is less than the number of samples, to perform an unregularized CCA.
+
+```{r selection20, include=TRUE, eval=TRUE}
+nutrimouse$gene_selected <- nutrimouse$gene[, 1:20]
+str(nutrimouse$gene_selected)
+```
+
+
+```{r cca, include=TRUE, eval=TRUE}
+cca.res <- rcc(X=nutrimouse$gene_selected, Y=nutrimouse$lipid, ncomp=2)
+max(abs(nutrimouse$gene_selected - cca.res$X))
+max(abs(nutrimouse$lipid - cca.res$Y))
+str(cca.res)
+cca.res$cor
+```
+
+The sample distribution plot can be performed with **variates**, sample coordinates in the new reference (rotated axes) for each of the two blocks.
+
+```{r cca_score_plot, include=TRUE, eval=TRUE}
+str(cca.res$variates)
+PCx <- 1
+PCy <- 2
+par(mfrow=c(1,2), las=1, mar=c(4,3,1,1))
+plot(cca.res$variates$X[, PCx], cca.res$variates$X[, PCy], xlab=PCx, ylab=PCy, main="X", type='n')
+text(cca.res$variates$X[, PCx], cca.res$variates$X[, PCy], rownames(cca.res$variates$X), col='blue', cex=0.6)
+plot(cca.res$variates$Y[, PCx], cca.res$variates$Y[, PCy], xlab=PCx, ylab=PCy, main="Y", type='n')
+text(cca.res$variates$Y[, PCx], cca.res$variates$Y[, PCy], rownames(cca.res$variates$Y), col='blue', cex=0.6)
+cor(cca.res$variates$X[,1], cca.res$variates$Y[,1])
+cor(cca.res$variates$X[,2], cca.res$variates$Y[,2])
+plotIndiv(cca.res)
+plotArrow(cca.res)
+```
+
+Variable relationship is obtained from **loadings** or with `plotVar`.
+
+```{r cca_loading_plot, include=TRUE, eval=FALSE}
+par(mfrow=c(1,2), las=2, mar=c(4,8,1,1))
+loadings.ind.X <- order(abs(cca.res$loadings$X[, 1]), decreasing = T)
+barplot(head(cca.res$loadings$X[loadings.ind.X, 1], 10), main="X", horiz = T, cex.names=0.8)
+loadings.ind.Y <- order(abs(cca.res$loadings$Y[, 1]), decreasing = T)
+barplot(head(cca.res$loadings$Y[loadings.ind.Y, 1], 10), main="Y", horiz = T, cex.names=0.8)
+max(abs(cca.res$variates$X - scale(cca.res$X, center=T, scale=F) %*% cca.res$loadings$X))
+max(abs(cca.res$variates$Y - scale(cca.res$Y, center=T, scale=F) %*% cca.res$loadings$Y))
+plotVar(cca.res)
+```
+
+#### 2. Perform CCA with scaled datasets and observe the difference
+
+```{r cca_scaled, include=TRUE, eval=TRUE}
+cca.res.scale <- rcc(X=scale(nutrimouse$gene_selected, center=T, scale=T), 
+                     Y=scale(nutrimouse$lipid, center=T, scale=T), ncomp=2)
+max(abs(cca.res.scale$cor - cca.res$cor))
+max(abs(cca.res.scale$variates$X - cca.res$variates$X))
+max(abs(cca.res.scale$variates$Y - cca.res$variates$Y))
+max(abs(cca.res.scale$loadings$X - cca.res$loadings$X))
+max(abs(cca.res.scale$loadings$Y - cca.res$loadings$Y))
+```
+
+#### 3. Perform regularized CCA with all genes and lipids.
+```{r rcca, include=TRUE, eval=TRUE}
+rcca.res <- rcc(X=nutrimouse$gene, Y=nutrimouse$lipid, ncomp=2, method="shrinkage")
+plotVar(rcca.res)
+```
