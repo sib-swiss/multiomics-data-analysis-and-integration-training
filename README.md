@@ -66,6 +66,9 @@ Thursday 14 March 15h - 17h room: A04.3018
 #### Day 2 - Multiblock analyses
  - [`Slides`](Day2/Lecture_multiblock_analyses_JulienBoccard.pdf)
  - [`Practicals`](Day2/practicals_multiblock_analyses.pdf)
+
+## Feedback form
+https://forms.office.com/e/r6a3LzBhm5
  
  
  
