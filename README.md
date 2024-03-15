@@ -59,9 +59,9 @@ Thursday 14 March 15h - 17h room: A04.3018
 ## Course material
 
 #### Day 1 - Dimensionality reduction
- - [`Introduction`](Day1/Lecture_Introduction_JulienBoccard.pdf)
- - [`Slides`](Day1/Lecture_dimensionality_reduction_VanDuTran.pdf)
- - [`Practicals`](Day1/Dimensionality_reduction.pdf)
+ - [`Introduction`](Day1/Lecture_introduction_JulienBoccard.pdf)
+ - [`Slides`](Day1/Lecture_dimentionality_reduction_VanDuTran.pdf)
+ - [`Practicals`](Day1/practicals_dimensionality_reduction.html)
 
 #### Day 2 - Multiblock analyses
  - [`Slides`](Day2/Lecture_multiblock_analyses_JulienBoccard.pdf)
