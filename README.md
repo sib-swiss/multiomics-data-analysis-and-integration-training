@@ -32,7 +32,7 @@ This course is designed for beginner users with the following pre-requisites:
 You are required to bring your own laptop and have the following installed:
  - R and RStudio
  - R packages to install before the training:
-   [`packages_installation.R`](multiomics-data-analysis-and-integration-training/blob/master/packages_installation.R)
+   [`packages_installation.R`](https://github.com/sib-swiss/multiomics-data-analysis-and-integration-training/blob/master/packages_installation.R)
 
 ## Location 
 
