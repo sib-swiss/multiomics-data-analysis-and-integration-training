@@ -32,7 +32,7 @@ This course is designed for beginner users with the following pre-requisites:
 You are required to bring your own laptop and have the following installed:
  - R and RStudio
  - R packages to install before the training:
-   [`packages_installation.R`](multiomics-data-analysis-and-integration-training/blob/master/packages_installation.R)
+   [`packages_installation.R`](https://github.com/sib-swiss/multiomics-data-analysis-and-integration-training/blob/master/packages_installation.R)
 
 ## Location 
 
@@ -59,13 +59,16 @@ Thursday 14 March 15h - 17h room: A04.3018
 ## Course material
 
 #### Day 1 - Dimensionality reduction
- - [`Introduction`](Day1/Lecture_Introduction_JulienBoccard.pdf)
- - [`Slides`](Day1/Lecture_dimensionality_reduction_VanDuTran.pdf)
- - [`Practicals`](Day1/Dimensionality_reduction.pdf)
+ - [`Introduction`](Day1/Lecture_introduction_JulienBoccard.pdf)
+ - [`Slides`](Day1/Lecture_dimentionality_reduction_VanDuTran.pdf)
+ - [`Practicals`](Day1/practicals_dimensionality_reduction.html)
 
 #### Day 2 - Multiblock analyses
  - [`Slides`](Day2/Lecture_multiblock_analyses_JulienBoccard.pdf)
  - [`Practicals`](Day2/practicals_multiblock_analyses.pdf)
+
+## Feedback form
+https://forms.office.com/e/r6a3LzBhm5
  
  
  
