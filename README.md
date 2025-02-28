@@ -43,9 +43,9 @@ CMU, Ctre Médical Universitaire
 9 av, de Champel  
 CH-1211 GENEVE 
 
-Wednesday 13 March room: S3  
-Thursday 14 March 9h - 15h room: D02.1549.a   
-Thursday 14 March 15h - 17h room: A04.3018   
+Thursday March 6th: Auditoire Paul Boymond (2nd floor building B)  
+Friday March 7th am: Room C02.1540.a (previously SIV) 2nd floor of the CMU  
+Friday March 7th pm: Room C02.1538.a (previously SV) 2nd floor of the CMU
 
 ## Schedule 
 
