@@ -59,16 +59,16 @@ Friday March 7th pm: Room C02.1538.a (previously SV) 2nd floor of the CMU
 ## Course material
 
 #### Day 1 - Dimensionality reduction
- - [`Introduction`](Day1/Lecture_introduction_JulienBoccard.pdf)
+ - [`Introduction`](Day1/MultiOmics_Intro_2025_print.pdf)
  - [`Slides`](Day1/Lecture_dimentionality_reduction_VanDuTran.pdf)
- - [`Practicals`](Day1/practicals_dimensionality_reduction.html)
+ - [`Practicals`](Day1/)
 
 #### Day 2 - Multiblock analyses
- - [`Slides`](Day2/Lecture_multiblock_analyses_JulienBoccard.pdf)
+ - [`Slides`](Day2/MultiOmics_Data_Integration_2025_print.pdf)
  - [`Practicals`](Day2/practicals_multiblock_analyses.pdf)
 
 ## Feedback form
-https://forms.office.com/e/r6a3LzBhm5
+
  
  
  
