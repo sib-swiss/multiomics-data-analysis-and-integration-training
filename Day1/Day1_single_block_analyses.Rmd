@@ -78,9 +78,7 @@ ggplot(scaled.genes.melt, aes(x=value, col=variable)) +
 
 # run analysis
 PCA_genes_res <- opls(x = nutrimouse$gene,
-                      predI = 9,
-                      crossvalI = 7,
-                      permI = 100)
+                      predI = 9)
 ```
 
 ### Plot the explained variances
@@ -91,7 +89,7 @@ PCA_genes_res <- opls(x = nutrimouse$gene,
 
 # saliences
 
-variances_genes <- data.frame(variance = PCA_genes_res@pcaVarVn)
+variances_genes <- data.frame(variance = PCA_genes_res@modelDF$R2X)
 variances_genes$Dim <- rownames(variances_genes)
 
 ggplot(variances_genes, aes(x=Dim, y=variance)) +
@@ -122,7 +120,7 @@ ggplot(scores_genes, aes(x=p1, y=p2, col=diet, shape = genotype)) +
 ggplot(scores_genes, aes(x=p3, y=p4, col=diet, shape = genotype)) +
   geom_point(size=4) +
   labs(x=paste0("Dim.3 - ", PCA_genes_res@modelDF$R2X[3]),
-       y=paste0("Dim.2 - ", PCA_genes_res@modelDF$R2X[4]),
+       y=paste0("Dim.4 - ", PCA_genes_res@modelDF$R2X[4]),
        title = "scores plots on Dim.3 vs Dim.4") +
   theme_light()
 
@@ -150,7 +148,7 @@ ggplot(loadings_genes, aes(x=p3, y=p4, label=variable)) +
   geom_point() +
   geom_text_repel() +
   labs(x=paste0("Dim.3 - ", PCA_genes_res@modelDF$R2X[3]),
-       y=paste0("Dim.2 - ", PCA_genes_res@modelDF$R2X[4]),
+       y=paste0("Dim.4 - ", PCA_genes_res@modelDF$R2X[4]),
        title = "loadings plots on Dim.3 Dim.4") +
   theme_light()
 
@@ -177,7 +175,7 @@ PCA_lipids_res <- opls(x = nutrimouse$lipid,
 
 # saliences
 
-variances_lipids <- data.frame(variance = PCA_lipids_res@pcaVarVn)
+variances_lipids <- data.frame(variance = PCA_lipids_res@modelDF$R2X)
 variances_lipids$Dim <- rownames(variances_lipids)
 
 ggplot(variances_lipids, aes(x=Dim, y=variance)) +
@@ -208,7 +206,7 @@ ggplot(scores_lipids, aes(x=p1, y=p2, col=diet, shape = genotype)) +
 ggplot(scores_lipids, aes(x=p3, y=p4, col=diet, shape = genotype)) +
   geom_point(size=4) +
   labs(x=paste0("Dim.3 - ", PCA_lipids_res@modelDF$R2X[3]),
-       y=paste0("Dim.2 - ", PCA_lipids_res@modelDF$R2X[4]),
+       y=paste0("Dim.4 - ", PCA_lipids_res@modelDF$R2X[4]),
        title = "scores plots on Dim.3 vs Dim.4") +
   theme_light()
 
@@ -236,7 +234,7 @@ ggplot(loadings_lipids, aes(x=p3, y=p4, label=variable)) +
   geom_point() +
   geom_text_repel() +
   labs(x=paste0("Dim.3 - ", PCA_lipids_res@modelDF$R2X[3]),
-       y=paste0("Dim.2 - ", PCA_lipids_res@modelDF$R2X[4]),
+       y=paste0("Dim.4 - ", PCA_lipids_res@modelDF$R2X[4]),
        title = "loadings plots on Dim.3 Dim.4") +
   theme_light()
 
@@ -264,40 +262,48 @@ PLS_cano_scores_genes <- data.frame(metadata, PLS_cano_res$variates$X)
 
 ggplot(PLS_cano_scores_genes, aes(x=comp1, y=comp2, col=diet, shape = genotype)) +
   geom_point(size=4) +
-  labs(title = "scores plots on Dim.1 vs Dim.2 - genes") +
+  labs(x=paste0("Dim.1 - ", round(PLS_cano_res$prop_expl_var$X["comp1"], 2)),
+       y=paste0("Dim.2 - ", round(PLS_cano_res$prop_expl_var$X["comp2"], 2)),
+       title = "scores plots on Dim.1 vs Dim.2 - genes") +
   theme_light()
 
 PLS_cano_scores_lipids <- data.frame(metadata, PLS_cano_res$variates$Y)
 
 ggplot(PLS_cano_scores_lipids, aes(x=comp1, y=comp2, col=diet, shape = genotype)) +
   geom_point(size=4) +
-  labs(title = "scores plots on Dim.1 vs Dim.2 - lipids") +
+  labs(x=paste0("Dim.1 - ", round(PLS_cano_res$prop_expl_var$Y["comp1"], 2)),
+       y=paste0("Dim.2 - ", round(PLS_cano_res$prop_expl_var$Y["comp2"], 2)),
+       title = "scores plots on Dim.1 vs Dim.2 - lipids") +
   theme_light()
 
 # or with function from mixomics
 plotIndiv(PLS_cano_res)
 ```
 
-### Variables contribution in each data block to each dimension, after deflating more *important* variates  
+### Variables contribution in each data block to each dimension
 
 ```{r pls cano loadings, message=FALSE, warning=FALSE, fig.align='center'}
 
-PLS_cano_loadings_genes <- data.frame(PLS_cano_res$loadings$X)
+PLS_cano_loadings_genes <- data.frame(PLS_cano_res$loadings.star[[1]])
 PLS_cano_loadings_genes$variable <- rownames(PLS_cano_loadings_genes)
 
-ggplot(PLS_cano_loadings_genes, aes(x=comp1, y=comp2, label=variable)) +
+ggplot(PLS_cano_loadings_genes, aes(x=X1, y=X2, label=variable)) +
   geom_point() +
   geom_text_repel() +
-  labs(title = "loadings plots on Dim.1 Dim.2 - genes") +
+  labs(x=paste0("Dim.1 - ", round(PLS_cano_res$prop_expl_var$X["comp1"], 2)),
+       y=paste0("Dim.2 - ", round(PLS_cano_res$prop_expl_var$X["comp2"], 2)),
+       title = "loadings plots on Dim.1 Dim.2 - genes") +
   theme_light()
 
-PLS_cano_loadings_lipids <- data.frame(PLS_cano_res$loadings$Y)
+PLS_cano_loadings_lipids <- data.frame(PLS_cano_res$loadings.star[[2]])
 PLS_cano_loadings_lipids$variable <- rownames(PLS_cano_loadings_lipids)
 
-ggplot(PLS_cano_loadings_lipids, aes(x=comp1, y=comp2, label=variable)) +
+ggplot(PLS_cano_loadings_lipids, aes(x=X1, y=X2, label=variable)) +
   geom_point() +
   geom_text_repel() +
-  labs(title = "loadings plots on Dim.1 Dim.2 - lipids") +
+  labs(x=paste0("Dim.1 - ", round(PLS_cano_res$prop_expl_var$Y["comp1"], 2)),
+       y=paste0("Dim.2 - ", round(PLS_cano_res$prop_expl_var$Y["comp2"], 2)),
+       title = "loadings plots on Dim.1 Dim.2 - lipids") +
   theme_light()
 
 ```
@@ -318,24 +324,31 @@ PLS_reg_scores_genes <- data.frame(metadata, PLS_reg_res$variates$X)
 
 ggplot(PLS_reg_scores_genes, aes(x=comp1, y=comp2, col=diet, shape = genotype)) +
   geom_point(size=4) +
-  labs(title = "regression analysis - scores plots on Dim.1 vs Dim.2 - genes") +
+  labs(x=paste0("Dim.1 - ", round(PLS_reg_res$prop_expl_var$X["comp1"], 2)),
+       y=paste0("Dim.2 - ", round(PLS_reg_res$prop_expl_var$X["comp2"], 2)),
+       title = "regression analysis - scores plots on Dim.1 vs Dim.2 - genes") +
   theme_light()
 
 ggplot(PLS_cano_scores_genes, aes(x=comp1, y=comp2, col=diet, shape = genotype)) +
   geom_point(size=4) +
-  labs(title = "canonical analysis - scores plots on Dim.1 vs Dim.2 - genes") +
+  labs(x=paste0("Dim.1 - ", round(PLS_cano_res$prop_expl_var$X["comp1"], 2)),
+       y=paste0("Dim.2 - ", round(PLS_cano_res$prop_expl_var$X["comp2"], 2)),
+       title = "canonical analysis - scores plots on Dim.1 vs Dim.2 - genes") +
   theme_light()
 
 PLS_reg_scores_lipids <- data.frame(metadata, PLS_reg_res$variates$Y)
 
 ggplot(PLS_cano_scores_lipids, aes(x=comp1, y=comp2, col=diet, shape = genotype)) +
   geom_point(size=4) +
-  labs(title = "regression analysis - scores plots on Dim.1 vs Dim.2 - lipids") +
+  labs(x=paste0("Dim.1 - ", round(PLS_cano_res$prop_expl_var$Y["comp1"], 2)),
+       y=paste0("Dim.2 - ", round(PLS_cano_res$prop_expl_var$Y["comp2"], 2)),title = "regression analysis - scores plots on Dim.1 vs Dim.2 - lipids") +
   theme_light()
 
 ggplot(PLS_reg_scores_lipids, aes(x=comp1, y=comp2, col=diet, shape = genotype)) +
   geom_point(size=4) +
-  labs(title = "canonical analysis - scores plots on Dim.1 vs Dim.2 - lipids") +
+  labs(x=paste0("Dim.1 - ", round(PLS_reg_res$prop_expl_var$Y["comp1"], 2)),
+       y=paste0("Dim.2 - ", round(PLS_reg_res$prop_expl_var$Y["comp2"], 2)),
+       title = "canonical analysis - scores plots on Dim.1 vs Dim.2 - lipids") +
   theme_light()
 
 ```
