@@ -91,6 +91,7 @@ Run a permutation test with DIABLO.test() from RVAideMemoire package
 
 blockPLS_permtest <- DIABLO.test(blockPLS_res, progress = FALSE)
 
+blockPLS_permtest
 ```
 
 ## Question 4: what is the variance explained for each block by each latent variable and globally?
@@ -345,7 +346,7 @@ test.COPLS_res <- predict(object = train.COPLS_res,
                           newdata = test.data)
 
 
-data.frame(test.COPLS_res$class, True.genotype=metadata$genotype[test.observations])
+data.frame(test.COPLS_res$class, Y.pred = test.COPLS_res$Y, True.genotype=metadata$genotype[test.observations])
 
 ```
 
