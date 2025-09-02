@@ -36,16 +36,6 @@ You are required to bring your own laptop and have the following installed:
 
 ## Location 
 
-The course will take place at:
-
-CMU, Ctre Médical Universitaire  
-1 rue Michel-Servet  
-9 av, de Champel  
-CH-1211 GENEVE 
-
-Thursday March 6th: Auditoire Paul Boymond (2nd floor building B)  
-Friday March 7th am: Room C02.1540.a (previously SIV) 2nd floor of the CMU  
-Friday March 7th pm: Room C02.1538.a (previously SV) 2nd floor of the CMU
 
 ## Schedule 
 
@@ -61,15 +51,14 @@ Friday March 7th pm: Room C02.1538.a (previously SV) 2nd floor of the CMU
 #### Day 1 - Dimensionality reduction
  - [`Introduction`](Day1/MultiOmics_Intro_2025_print.pdf)
  - [`Slides`](Day1/Lecture_dimentionality_reduction_VanDuTran.pdf)
- - [`Practicals`](Day1/practicals_Day_1.pdf)
+ - [`Practicals`](Day1/Practicals_Day_1.pptx)
 
 #### Day 2 - Multiblock analyses
  - [`Slides`](Day2/MultiOmics_Data_Integration_2025_print.pdf)
- - [`Practicals`](Day2/practicals_multiblock_analyses.pdf)
+ - [`Practicals`](Day2/Practicals_Day_2.pptx)
 
 ## Feedback form
 
-https://forms.office.com/e/Keax80Q818
  
  
  
