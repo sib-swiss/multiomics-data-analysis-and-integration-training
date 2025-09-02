@@ -51,11 +51,11 @@ You are required to bring your own laptop and have the following installed:
 #### Day 1 - Dimensionality reduction
  - [`Introduction`](Day1/MultiOmics_Intro_2025_print.pdf)
  - [`Slides`](Day1/Lecture_dimentionality_reduction_VanDuTran.pdf)
- - [`Practicals`](Day1/Practicals_Day_1.pptx)
+ - [`Practicals`](Day1/Practicals_Day_1.pdf)
 
 #### Day 2 - Multiblock analyses
  - [`Slides`](Day2/MultiOmics_Data_Integration_2025_print.pdf)
- - [`Practicals`](Day2/Practicals_Day_2.pptx)
+ - [`Practicals`](Day2/Practicals_Day_2.pdf)
 
 ## Feedback form
 
