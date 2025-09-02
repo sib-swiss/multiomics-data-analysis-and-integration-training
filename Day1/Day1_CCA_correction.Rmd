@@ -1,0 +1,296 @@
+---
+title: "CCA"
+author: "Florence Mehl"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    toc: yes
+    theme: paper
+    higlight: tango
+    code_folding: hide
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+library(ropls)
+library(CCA)
+library(ggplot2)
+library(ggrepel)
+library(reshape2)
+library(mixOmics)
+
+```
+
+
+# Context and dataset introduction
+
+This dataset originates from a nutrigenomic study in mice (Martin et al., 2007), designed to investigate how dietary fatty acid composition influences liver lipid profiles and hepatic gene expression.
+
+**Experimental Design**  
+
+Forty mice were cross-classified according to two experimental factors, each with multiple levels:
+
+- Genotype (2 levels):  
+Wild-type (WT)  
+PPARα knockout (PPARα -/-)  
+
+- Diet (5 levels):
+
+REF: Reference diet (50/50 corn and colza oils)  
+COC: Saturated fatty acid-rich diet (hydrogenated coconut oil)  
+SUN: Omega-6-rich diet (sunflower oil)  
+LIN: Omega-3-rich diet (linseed oil)  
+FISH: Mixed diet (corn/colza/enriched fish oils in 43/43/14 ratio)  
+
+Each genotype-diet combination includes four biological replicates.
+
+**Variables Collected**  
+
+Two sets of variables were measured for each mouse:
+
+- Gene Expression:  
+
+Expression levels of 120 selected hepatic genes, chosen from ~30,000 candidates for their relevance to nutritional regulation.  
+Measured using nylon macroarrays with radioactive labeling.  
+
+- Lipid Composition:  
+
+Relative concentrations (percentages) of 21 hepatic fatty acids.  
+Quantified via gas chromatography.
+
+```{r import and format dataset, message=FALSE, warning=FALSE}
+
+data("nutrimouse")
+genes <- nutrimouse$gene
+lipids <- nutrimouse$lipid
+metadata <- data.frame(genotype = nutrimouse$genotype, diet = nutrimouse$diet)
+metadata$sample_name <- paste0(rownames(metadata), "_", metadata$genotype, "_", metadata$diet)
+rownames(genes) <- metadata$sample_name
+rownames(lipids) <- metadata$sample_name
+
+```
+
+# 1.Basic CCA
+
+- Perform CCA (mixOmics::rcc) between 20 genes and all lipids.
+- Investigate correlations, variable relationship and sample distribution with plots.
+
+note: The gene expression data is reduced to 20 genes so that the number of variables is less than the number of samples, to perform an unregularized CCA.
+
+```{r selection20, echo=TRUE, message=FALSE, warning=FALSE}
+
+nutrimouse$gene_selected <- nutrimouse$gene[,1:20]
+str(nutrimouse$gene_selected)
+
+```
+
+
+```{r cca, echo=TRUE, message=FALSE, warning=FALSE}
+
+cca.res <- rcc(X=nutrimouse$gene_selected, Y=nutrimouse$lipid)
+
+```
+
+## Plot the scores
+
+The sample distribution plot can be performed with **variates**, sample coordinates in the new reference (rotated axes) for each of the two blocks.
+
+```{r cca_score_plot, echo=TRUE, message=FALSE, warning=FALSE}
+
+cca.res_scores_genes <- data.frame(metadata, cca.res$variates$X)
+
+ggplot(cca.res_scores_genes, aes(x=X1, y=X2, col=diet, shape = genotype)) +
+  geom_point(size=4) +
+  labs(title = "scores plots on Dim.1 vs Dim.2 - genes") +
+  theme_light()
+
+cca.res_scores_lipids <- data.frame(metadata, cca.res$variates$Y)
+
+ggplot(cca.res_scores_lipids, aes(x=X1, y=X2, col=diet, shape = genotype)) +
+  geom_point(size=4) +
+  labs(title = "scores plots on Dim.1 vs Dim.2 - lipids") +
+  theme_light()
+
+```
+
+## Plot the loadings
+
+Variable relationship is obtained from **loadings** or with `plotVar`.
+
+```{r cca_loading_plot, echo=TRUE, message=FALSE, warning=FALSE}
+cca.res_loadings_genes <- data.frame(cca.res$loadings$X)
+cca.res_loadings_genes$variable <- rownames(cca.res_loadings_genes)
+
+ggplot(cca.res_loadings_genes, aes(x=X1, y=X2, label=variable)) +
+  geom_point() +
+  geom_text_repel() +
+  labs(title = "loadings plots on Dim.1 Dim.2 - genes") +
+  theme_light()
+
+cca.res_loadings_lipids <- data.frame(cca.res$loadings$Y)
+cca.res_loadings_lipids$variable <- rownames(cca.res_loadings_lipids)
+
+ggplot(cca.res_loadings_lipids, aes(x=X1, y=X2, label=variable)) +
+  geom_point() +
+  geom_text_repel() +
+  labs(title = "loadings plots on Dim.1 Dim.2 - lipids") +
+  theme_light()
+
+plotVar(cca.res)
+```
+
+# 2.CCA on scaled data
+
+- Perform CCA with scaled datasets and observe the difference with previous one
+
+```{r cca_scaled,  echo=TRUE, message=FALSE, warning=FALSE}
+cca.res.scale <- rcc(X=scale(nutrimouse$gene_selected, center=T, scale=T), 
+                     Y=scale(nutrimouse$lipid, center=T, scale=T), ncomp=2)
+
+```
+
+## Plot the scores
+
+```{r scaled cca_score_plot, echo=TRUE, message=FALSE, warning=FALSE}
+
+cca.res.scale_scores_genes <- data.frame(metadata, cca.res.scale$variates$X)
+
+ggplot(cca.res.scale_scores_genes, aes(x=X1, y=X2, col=diet, shape = genotype)) +
+  geom_point(size=4) +
+  labs(title = "scores plots on Dim.1 vs Dim.2 - scaled genes") +
+  theme_light()
+
+ggplot(cca.res_scores_genes, aes(x=X1, y=X2, col=diet, shape = genotype)) +
+  geom_point(size=4) +
+  labs(title = "scores plots on Dim.1 vs Dim.2 - genes") +
+  theme_light()
+
+cca.res.scale_scores_lipids <- data.frame(metadata, cca.res.scale$variates$Y)
+
+ggplot(cca.res_scores_lipids, aes(x=X1, y=X2, col=diet, shape = genotype)) +
+  geom_point(size=4) +
+  labs(title = "scores plots on Dim.1 vs Dim.2 - scaled lipids") +
+  theme_light()
+
+ggplot(cca.res_scores_lipids, aes(x=X1, y=X2, col=diet, shape = genotype)) +
+  geom_point(size=4) +
+  labs(title = "scores plots on Dim.1 vs Dim.2 - lipids") +
+  theme_light()
+
+```
+
+## Plot the loadings
+
+```{r scaled cca_loading_plot, echo=TRUE, message=FALSE, warning=FALSE}
+cca.res.scale_loadings_genes <- data.frame(cca.res.scale$loadings$X)
+cca.res.scale_loadings_genes$variable <- rownames(cca.res.scale_loadings_genes)
+
+ggplot(cca.res.scale_loadings_genes, aes(x=X1, y=X2, label=variable)) +
+  geom_point() +
+  geom_text_repel() +
+  labs(title = "loadings plots on Dim.1 Dim.2 - scaled genes") +
+  theme_light()
+
+ggplot(cca.res_loadings_genes, aes(x=X1, y=X2, label=variable)) +
+  geom_point() +
+  geom_text_repel() +
+  labs(title = "loadings plots on Dim.1 Dim.2 - genes") +
+  theme_light()
+
+
+cca.res.scale_loadings_lipids <- data.frame(cca.res.scale$loadings$Y)
+cca.res.scale_loadings_lipids$variable <- rownames(cca.res.scale_loadings_lipids)
+
+ggplot(cca.res.scale_loadings_lipids, aes(x=X1, y=X2, label=variable)) +
+  geom_point() +
+  geom_text_repel() +
+  labs(title = "loadings plots on Dim.1 Dim.2 - scaled lipids") +
+  theme_light()
+
+ggplot(cca.res_loadings_lipids, aes(x=X1, y=X2, label=variable)) +
+  geom_point() +
+  geom_text_repel() +
+  labs(title = "loadings plots on Dim.1 Dim.2 - lipids") +
+  theme_light()
+
+plotVar(cca.res)
+```
+
+# 3.Regularized CCA
+
+- Perform regularized CCA with all genes and lipids.  
+
+```{r rcca, echo=TRUE, message=FALSE, warning=FALSE}
+rcca.res <- rcc(X=nutrimouse$gene, Y=nutrimouse$lipid, ncomp=2, method="shrinkage")
+```
+
+## Plot the scores
+
+```{r rcca_score_plot, echo=TRUE, message=FALSE, warning=FALSE}
+
+rcca.res_scores_genes <- data.frame(metadata, rcca.res$variates$X)
+
+ggplot(rcca.res_scores_genes, aes(x=X1, y=X2, col=diet, shape = genotype)) +
+  geom_point(size=4) +
+  labs(title = "scores plots on Dim.1 vs Dim.2 - regularized cca - genes") +
+  theme_light()
+
+ggplot(cca.res_scores_genes, aes(x=X1, y=X2, col=diet, shape = genotype)) +
+  geom_point(size=4) +
+  labs(title = "scores plots on Dim.1 vs Dim.2 - genes") +
+  theme_light()
+
+rcca.res_scores_lipids <- data.frame(metadata, rcca.res$variates$Y)
+
+ggplot(rcca.res_scores_lipids, aes(x=X1, y=X2, col=diet, shape = genotype)) +
+  geom_point(size=4) +
+  labs(title = "scores plots on Dim.1 vs Dim.2 - regularized cca - lipids") +
+  theme_light()
+
+ggplot(cca.res_scores_lipids, aes(x=X1, y=X2, col=diet, shape = genotype)) +
+  geom_point(size=4) +
+  labs(title = "scores plots on Dim.1 vs Dim.2 - lipids") +
+  theme_light()
+
+```
+
+## Plot the loadings
+
+```{r rcca_loading_plot, echo=TRUE, message=FALSE, warning=FALSE}
+rcca.res_loadings_genes <- data.frame(rcca.res$loadings$X)
+rcca.res_loadings_genes$variable <- rownames(rcca.res_loadings_genes)
+
+ggplot(rcca.res_loadings_genes, aes(x=X1, y=X2, label=variable)) +
+  geom_point() +
+  geom_text_repel() +
+  labs(title = "loadings plots on Dim.1 Dim.2 - regularized cca - genes") +
+  theme_light()
+
+ggplot(cca.res_loadings_genes, aes(x=X1, y=X2, label=variable)) +
+  geom_point() +
+  geom_text_repel() +
+  labs(title = "loadings plots on Dim.1 Dim.2 - genes") +
+  theme_light()
+
+
+rcca.res_loadings_lipids <- data.frame(rcca.res$loadings$Y)
+rcca.res_loadings_lipids$variable <- rownames(rcca.res_loadings_lipids)
+
+ggplot(rcca.res_loadings_lipids, aes(x=X1, y=X2, label=variable)) +
+  geom_point() +
+  geom_text_repel() +
+  labs(title = "loadings plots on Dim.1 Dim.2 - regularized cca - lipids") +
+  theme_light()
+
+ggplot(cca.res_loadings_lipids, aes(x=X1, y=X2, label=variable)) +
+  geom_point() +
+  geom_text_repel() +
+  labs(title = "loadings plots on Dim.1 Dim.2 - lipids") +
+  theme_light()
+
+plotVar(rcca.res)
+```

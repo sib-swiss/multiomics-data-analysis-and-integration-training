@@ -1,0 +1,336 @@
+---
+title: "Supervised Multiblock analyses"
+author: "Florence Mehl"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document: 
+    toc: TRUE
+    theme: paper
+    higlight: tango
+    code_folding: "hide"
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(MBAnalysis)
+library(CCA)
+library(ggplot2)
+library(ggrepel)
+library(reshape2)
+library(mixOmics)
+library(RVAideMemoire)
+library(abind)
+library(ConsensusOPLS)
+library(BiocParallel)
+
+```
+
+# Context and dataset introduction
+
+This dataset originates from a nutrigenomic study in mice (Martin et al., 2007), designed to investigate how dietary fatty acid composition influences liver lipid profiles and hepatic gene expression.
+
+**Experimental Design**  
+
+Forty mice were cross-classified according to two experimental factors, each with multiple levels:
+
+- Genotype (2 levels):  
+Wild-type (WT)  
+PPARα knockout (PPARα -/-)  
+
+- Diet (5 levels):
+
+REF: Reference diet (50/50 corn and colza oils)  
+COC: Saturated fatty acid-rich diet (hydrogenated coconut oil)  
+SUN: Omega-6-rich diet (sunflower oil)  
+LIN: Omega-3-rich diet (linseed oil)  
+FISH: Mixed diet (corn/colza/enriched fish oils in 43/43/14 ratio)  
+
+Each genotype-diet combination includes four biological replicates.
+
+**Variables Collected**  
+
+Two sets of variables were measured for each mouse:
+
+- Gene Expression:  
+
+Expression levels of 120 selected hepatic genes, chosen from ~30,000 candidates for their relevance to nutritional regulation.  
+Measured using nylon macroarrays with radioactive labeling.  
+
+- Lipid Composition:  
+
+Relative concentrations (percentages) of 21 hepatic fatty acids.  
+Quantified via gas chromatography.  
+
+
+```{r import and format dataset, message=FALSE, warning=FALSE}
+
+data("nutrimouse")
+genes <- nutrimouse$gene
+lipids <- nutrimouse$lipid
+metadata <- data.frame(genotype = nutrimouse$genotype, diet = nutrimouse$diet)
+metadata$sample_name <- paste0(rownames(metadata), "_", metadata$genotype, "_", metadata$diet)
+rownames(genes) <- metadata$sample_name
+rownames(lipids) <- metadata$sample_name
+
+```
+
+# Discriminant analysis of genotypes
+
+## Block PLS-DA Analysis
+
+- Format lipid and gene data as a list of dataframes.
+- Define the outcome variable (genotype) as a factor.
+- Run block.plsda() from the mixOmics package to model genotype discrimination.  
+
+```{r data preparation, message=FALSE, warning=FALSE}
+
+# prepare data
+blockPLS_data <- list(genes=genes, lipids=lipids)
+genotype <- as.factor(metadata$genotype)
+
+# run analysis
+blockPLS_res <- block.plsda(X = blockPLS_data, Y = genotype, design = "full", all.outputs = T, ncomp = 10)
+
+```
+
+## Latent Variable Selection
+
+- Use perf() to evaluate model performance across components and visualise.
+- Re-run block.plsda() using the optimal number of latent variables.
+
+```{r choice the size of model, message=FALSE, warning=FALSE, fig.align='center'}
+
+bp <- MulticoreParam(workers = 4)
+
+blockPLS_perf <- perf(blockPLS_res, validation = 'Mfold', folds = 7, nrepeat = 1, auc = TRUE, BPPARAM = bp, progressBar = FALSE)
+
+blockPLS_perf <- perf(
+  blockPLS_res,
+  validation = "Mfold",
+  folds = 7,
+  nrepeat = 100,
+  auc = TRUE,
+  BPPARAM = bp,
+  seed = 1
+)
+
+plot(blockPLS_perf)
+
+blockPLS_res <- block.plsda(X = blockPLS_data, Y = genotype, design = "full", all.outputs = T, ncomp = 2)
+
+```
+
+## Model Significance
+
+- Perform a cross-validation to estimate how well your fitted MBPLSDA/DIABLO model generalises to new data using DIABLO.cv() from the RVAideMemoire package.  
+- Perform a permutation test to test whether your observed model performance is significantly better than chance using DIABLO.test() from the RVAideMemoire package.
+
+```{r permutation test, message=FALSE, warning=FALSE}
+
+# Cross-validation with DIABLO.cv()
+blockPLS_cv <- DIABLO.cv(blockPLS_res,
+                         validation = c("Mfold"),
+                         k = 7,
+                         repet = 100)
+
+blockPLS_cv
+
+# Permutation test with DIABLO.test()
+blockPLS_permtest <- DIABLO.test(blockPLS_res,
+                                 nperm = 100,
+                                 progress = TRUE)
+
+blockPLS_permtest
+
+```
+
+## Explained Variance?
+
+Plot explained variance per block and globally across latent variables.
+- Percentage of variance explained in each block by each LV: AVE_X
+- How strongly each block contributes to global LV structure: AVE[["AVE_outer"]]
+
+```{r explained variance, message=FALSE, warning=FALSE, fig.align='center'}
+
+blockPLS_expl <- do.call("rbind",blockPLS_res$AVE$AVE_X[1:2])
+
+# extract the cumulative global explained variance
+ave_outer_cum <- blockPLS_res$AVE[["AVE_outer"]]
+# convert to incremental (per component)
+ave_outer_inc <- data.frame(comp1 = ave_outer_cum[1], comp2= diff(ave_outer_cum), row.names = "global")
+
+blockPLS_expl <- rbind(blockPLS_expl, ave_outer_inc)
+
+
+```
+
+## Sample Space Visualization
+
+- Use plotIndiv(..., block = "weighted.average") to visualize sample distributions in latent variable space.
+
+```{r comdim all samples scores, message=FALSE, warning=FALSE, fig.align='center'}
+
+plotIndiv()
+
+```
+
+## Variable Contributions
+
+- Use plotVar() to identify discriminant genes and lipids contributing to genotype separation.  
+
+```{r comdim all samples loadings, message=FALSE, warning=FALSE, fig.align='center'}
+
+plotVar()
+
+```
+
+# Consensus OPLS Discriminant Analysis of genotypes
+
+## Data Preparation
+
+- Organize lipid and gene datasets as a list of dataframes (one per block).  
+- Encode the outcome variable (genotype).   
+
+```{r data prep consensusOPLS-DA, message=FALSE, warning=FALSE, fig.align='center'}
+
+COPLS_data <- list(genes=as.matrix(genes), lipids=as.matrix(lipids))
+COPLS_data <- lapply(COPLS_data, scale)
+genotype <- metadata$genotype
+
+```
+
+## Consensus OPLS Analysis
+
+- Fit the Consensus OPLS model using ConsensusOPLS() from the ConsensusOPLS package.  
+- Model the relationship between the predictor blocks (lipids, genes) and the genotype outcome.  
+
+```{r consensusOPLS-DA, message=FALSE, warning=FALSE, fig.align='center'}
+COPLS_res <- ConsensusOPLS(
+  data = COPLS_data,
+  Y = genotype,
+  maxPcomp = 1,
+  maxOcomp = 1,
+  modelType = "da",
+  cvType = "nfold",
+  nfold = 40,
+  nperm = 100,
+  verbose = T,
+  kernelParams = list(type='p', params = c(order=1.0))
+)
+```
+
+
+## Model significance
+
+- Assess statistical significance using permutation tests and visualize with histograms of
+Q², dQ², and R²Y values from permuted models.  
+- The results of permutations can be found in `COPLS_res$permStats`.
+- The results for the optimal model can be found in `COPLS_res$optimal$modelCV` and `COPLS_res$optimal$modelCV$cv`
+- plot Q2 permutations
+- plot DQ2 permutations
+- plot R2Y permutations
+
+```{r permutations, message=FALSE, warning=FALSE, fig.align='center'}
+
+plotQ2()
+plotDQ2()
+plotR2()
+
+```
+
+## Block Contributions
+
+-Plot block contributions as a bar plot to see which omics layer drives genotype discrimination.  
+
+```{r consensus OPLS-DA contributions, message=FALSE, warning=FALSE, fig.align='center'}
+
+plotContribution()
+
+```
+
+## Sample Space Visualization
+
+- Plot scores to visualize sample distribution in the space of predictive and orthogonal latent variables.  
+
+```{r consensus OPLS-DA scores, message=FALSE, warning=FALSE, fig.align='center'}
+
+plotScores()
+
+```
+
+## Variable Contributions
+
+- Plot loadings: predictive vs orthogonal components
+- Interpret biological relevance
+
+```{r consensus OPLS-DA loadings, message=FALSE, warning=FALSE, fig.align='center'}
+
+plotLoadings()
+
+```
+
+- Identify most discriminant genes plotting VIP vs loadings on predictive component
+
+```{r consensus OPLS-DA VIP loadings, message=FALSE, warning=FALSE, fig.align='center'}
+
+plotVIP()
+
+```
+
+## Predicting with consensusOPLS
+
+Train a Consensus OPLS-DA model to discriminate between WT and PPAR samples using a training set and evaluate its performance on an independent test set.
+
+### Data Splitting
+
+- Select 30 samples for training and 10 samples for testing.  
+- Organize lipid and gene datasets as lists of matrices for training and testing.  
+- Scale each block separately for training and test sets.  
+- Define the outcome variable (genotype) for the training set.  
+
+```{r consensus OPLS-DA external validation data preparation, message=FALSE, warning=FALSE, fig.align='center'}
+
+```
+
+### Consensus OPLS Analysis
+
+- Fit the Consensus OPLS model on the training set.  
+
+```{r consensus OPLS-DA external validation model, message=FALSE, warning=FALSE, fig.align='center'}
+
+```
+
+### Model Evaluation
+
+- Assess statistical significance using permutation tests.  
+- visualize plotting Q², dQ², and R²Y values from permuted models.  
+- Observe block contributions, scores and loadings.  
+
+```{r consensus OPLS-DA external validation evaluation, message=FALSE, warning=FALSE, fig.align='center'}
+
+```
+
+### External Validation on Test Set
+
+- Predict class labels for the independent test samples using predict().  
+- Compare predicted classes and predicted Y values against the true genotypes.  
+- Summarize in a table for accuracy evaluation.  
+
+```{r consensus OPLS-DA external validation on test set, message=FALSE, warning=FALSE, fig.align='center'}
+
+test.COPLS_res <- predict(object = train.COPLS_res,
+                          newdata = test.data)
+
+# results
+
+data.frame(test.COPLS_res$class,
+           Y.pred = test.COPLS_res$Y,
+           True.genotype=metadata$genotype[test.observations])
+
+```
+
+
+
+

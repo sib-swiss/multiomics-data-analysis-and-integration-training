@@ -1,0 +1,170 @@
+---
+title: "Unsupervised Multiblock analyses"
+author: "Florence Mehl"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    toc: yes
+    theme: paper
+    higlight: tango
+    code_folding: hide
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+library(MBAnalysis)
+library(CCA)
+library(ggplot2)
+library(ggrepel)
+library(reshape2)
+
+```
+
+# Context and dataset introduction
+
+This dataset originates from a nutrigenomic study in mice (Martin et al., 2007), designed to investigate how dietary fatty acid composition influences liver lipid profiles and hepatic gene expression.
+
+**Experimental Design**  
+
+Forty mice were cross-classified according to two experimental factors, each with multiple levels:
+
+- Genotype (2 levels):  
+Wild-type (WT)  
+PPARα knockout (PPARα -/-)  
+
+- Diet (5 levels):
+
+REF: Reference diet (50/50 corn and colza oils)  
+COC: Saturated fatty acid-rich diet (hydrogenated coconut oil)  
+SUN: Omega-6-rich diet (sunflower oil)  
+LIN: Omega-3-rich diet (linseed oil)  
+FISH: Mixed diet (corn/colza/enriched fish oils in 43/43/14 ratio)  
+
+Each genotype-diet combination includes four biological replicates.
+
+**Variables Collected**  
+
+Two sets of variables were measured for each mouse:
+
+- Gene Expression:  
+
+Expression levels of 120 selected hepatic genes, chosen from ~30,000 candidates for their relevance to nutritional regulation.  
+Measured using nylon macroarrays with radioactive labeling.  
+
+- Lipid Composition:  
+
+Relative concentrations (percentages) of 21 hepatic fatty acids.  
+Quantified via gas chromatography.  
+
+```{r import and format dataset, message=FALSE, warning=FALSE}
+
+data("nutrimouse")
+genes <- nutrimouse$gene
+lipids <- nutrimouse$lipid
+metadata <- data.frame(genotype = nutrimouse$genotype, diet = nutrimouse$diet)
+metadata$sample_name <- paste0(rownames(metadata), "_", metadata$genotype, "_", metadata$diet)
+rownames(genes) <- metadata$sample_name
+rownames(lipids) <- metadata$sample_name
+
+```
+
+# Analysis of complete dataset
+
+Explore structure and variability in the complete multiomics dataset consisting of lipid and gene data.  
+
+## 1. Data Preparation
+
+Prepare dataset
+- concatenate genes and lipids dataframes
+- define the number of variables of both block
+
+Run ComDim analysis
+- use ComDim() from MBAnalysis package
+
+```{r comdim all samples, message=FALSE, warning=FALSE}
+
+# prepare dataset
+
+# run analysis
+ComDim_res <- ComDim(X = ComDim_data, # concatenated genes and lipids dataframes
+                     block = n_group, # define the number of variables of both block
+                     name.block = c("genes", "lipids"),
+                     scale = T,
+                     scale.block = T)
+```
+
+## Block Contributions
+
+- Plot saliences to assess how lipids and genes contribute to each dimension  
+
+```{r comdim all samples saliences, fig.align='center', message=FALSE, warning=FALSE}
+
+# saliences
+
+saliences <- ComDim_res$saliences
+
+```
+
+## Sample Space Visualization
+
+- plot scores (Scor.g) on Dim.1 vs Dim.2 with percentages of explained variance on axes
+- plot scores (Scor.g) on Dim.3 vs Dim.4 with percentages of explained variance on axes
+- identify main sources of variation  
+
+```{r comdim all samples scores, message=FALSE, warning=FALSE, fig.align='center'}
+
+scores <- data.frame(metadata, ComDim_res$Scor.g)
+
+# ComDim_res$cumexplained[1,"%explX"] percentage of explained variance on Dim.1
+
+```
+
+## Variable Contributions
+
+- plot loadings (Load.g) on Dim.1 vs Dim.2 with percentages of explained variance on axes
+- plot loadings (Load.g) on Dim.3 vs Dim.4 with percentages of explained variance on axes
+- Highlight key genes and lipids driving sample differences  
+
+```{r comdim all samples loadings, message=FALSE, warning=FALSE, fig.align='center'}
+
+loadings <- data.frame(ComDim_res$Load.g)
+
+```
+
+# Repeat analysis for wt samples only
+
+```{r comdim wt only, message=FALSE, warning=FALSE, fig.align='center'}
+
+# prepare dataset
+
+# run analysis
+
+# saliences
+
+# scores plots
+
+# loadings plots
+
+```
+
+# Repeat analysis for ppar samples only
+
+```{r comdim ppar only, message=FALSE, warning=FALSE, fig.align='center'}
+
+# prepare dataset
+
+# run analysis
+
+# saliences
+
+# scores plots
+
+# loadings plots
+
+```
+
+

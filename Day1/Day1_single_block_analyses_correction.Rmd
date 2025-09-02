@@ -1,0 +1,571 @@
+---
+title: "Practicals Day 1"
+author: "Florence Mehl"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    toc: yes
+    theme: paper
+    higlight: tango
+    code_folding: hide
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+library(ropls)
+library(CCA)
+library(ggplot2)
+library(ggrepel)
+library(reshape2)
+
+```
+
+# Context and dataset introduction
+
+This dataset originates from a nutrigenomic study in mice (Martin et al., 2007), designed to investigate how dietary fatty acid composition influences liver lipid profiles and hepatic gene expression.
+
+**Experimental Design**
+
+Forty mice were cross-classified according to two experimental factors, each with multiple levels:
+
+-   Genotype (2 levels):\
+    Wild-type (WT)\
+    PPARα knockout (PPARα -/-)
+
+-   Diet (5 levels):
+
+REF: Reference diet (50/50 corn and colza oils)\
+COC: Saturated fatty acid-rich diet (hydrogenated coconut oil)\
+SUN: Omega-6-rich diet (sunflower oil)\
+LIN: Omega-3-rich diet (linseed oil)\
+FISH: Mixed diet (corn/colza/enriched fish oils in 43/43/14 ratio)
+
+Each genotype-diet combination includes four biological replicates.
+
+**Variables Collected**
+
+Two sets of variables were measured for each mouse:
+
+-   Gene Expression:
+
+Expression levels of 120 selected hepatic genes, chosen from \~30,000 candidates for their relevance to nutritional regulation.\
+Measured using nylon macroarrays with radioactive labeling.
+
+-   Lipid Composition:
+
+Relative concentrations (percentages) of 21 hepatic fatty acids.\
+Quantified via gas chromatography.
+
+```{r import and format dataset, message=FALSE, warning=FALSE}
+
+data("nutrimouse")
+genes <- nutrimouse$gene
+lipids <- nutrimouse$lipid
+metadata <- data.frame(genotype = nutrimouse$genotype, diet = nutrimouse$diet)
+metadata$sample_name <- paste0(rownames(metadata), "_", metadata$genotype, "_", metadata$diet)
+rownames(genes) <- metadata$sample_name
+rownames(lipids) <- metadata$sample_name
+
+```
+
+# Unsupervised analysis of genes dataset
+
+## Data exploration
+
+Visualize the distribution of gene expression values, to ensure comparability across genes and preparing for multivariate analyses.
+
+-   Visualize distributions plotting histograms of raw data and scaled data
+-   Check normalisation
+
+```{r distrib genes, message=FALSE, warning=FALSE}
+
+genes.melt <- melt(nutrimouse$gene)
+
+ggplot(genes.melt, aes(x=value, col=variable)) +
+  geom_density() +
+  guides(col=F)
+
+scaled.genes.melt <- melt(scale(nutrimouse$gene))
+scaled.genes.melt <- scaled.genes.melt[,-1]
+colnames(scaled.genes.melt) <- c("variable", "value")
+  
+ggplot(scaled.genes.melt, aes(x=value, col=variable)) +
+  geom_density() +
+  guides(col=F)
+```
+
+## Principal Component Analysis
+
+Explore structure and variability in genes block.
+
+### Compute PCA
+
+```{r pca genes, message=FALSE, warning=FALSE}
+
+# run analysis
+PCA_genes_res <- opls(x = nutrimouse$gene,
+                      predI = 9)
+```
+
+### Plot the explained variances
+
+-   scree plot
+-   [Note about pcaVarVn vs [modelDF\@R2X](mailto:modelDF@R2X){.email}]{.underline}:\
+    If you want the classic PCA-style scree plot → you should use pcaVarVn. That’s the eigenvalue-based variance explained per component, and that’s what most people expect when they see a scree plot: each bar/point = % variance captured by that PC. If you want to reflect what the actual ropls model says it explains → you could use [modelDF\@R2X](mailto:modelDF@R2X){.email}, but then it’s not a scree plot in the traditional sense; it’s more like a cumulative variance plot from the model’s perspective.
+
+```{r pca genes variances, fig.align='center', message=FALSE, warning=FALSE}
+
+# saliences
+
+variances_genes <- data.frame(variance = PCA_genes_res@pcaVarVn)
+variances_genes$Dim <- rownames(variances_genes)
+
+ggplot(variances_genes, aes(x=Dim, y=variance)) +
+  geom_bar(stat = "identity") +
+  theme_light() +
+  labs(x = "principal components",
+       y = "percentage of explained variance",
+       title = "scree plot")
+
+```
+
+### Sample space visualization
+
+-   Plot scores: Dim.1 vs Dim.2 and Dim.3 vs Dim.4
+-   Identify main sources of variation
+
+```{r pca genes scores, message=FALSE, warning=FALSE, fig.align='center'}
+
+scores_genes <- data.frame(metadata, PCA_genes_res@scoreMN)
+
+ggplot(scores_genes, aes(x=p1, y=p2, col=diet, shape = genotype)) +
+  geom_point(size=4) +
+  labs(x=paste0("Dim.1 - ", PCA_genes_res@modelDF$R2X[1]),
+       y=paste0("Dim.2 - ", PCA_genes_res@modelDF$R2X[2]),
+       title = "scores plots on Dim.1 vs Dim.2") +
+  theme_light()
+
+ggplot(scores_genes, aes(x=p3, y=p4, col=diet, shape = genotype)) +
+  geom_point(size=4) +
+  labs(x=paste0("Dim.3 - ", PCA_genes_res@modelDF$R2X[3]),
+       y=paste0("Dim.4 - ", PCA_genes_res@modelDF$R2X[4]),
+       title = "scores plots on Dim.3 vs Dim.4") +
+  theme_light()
+
+```
+
+### Variable coontributions
+
+-   Plot loadings: Dim.1 vs Dim.2 and Dim.3 vs Dim.4
+-   Interpret biological relevance
+
+```{r pca genes loadings, message=FALSE, warning=FALSE, fig.align='center'}
+
+loadings_genes <- data.frame(PCA_genes_res@loadingMN)
+loadings_genes$variable <- rownames(loadings_genes)
+
+ggplot(loadings_genes, aes(x=p1, y=p2, label=variable)) +
+  geom_point() +
+  geom_text_repel() +
+  labs(x=paste0("Dim.1 - ", PCA_genes_res@modelDF$R2X[1]),
+       y=paste0("Dim.2 - ", PCA_genes_res@modelDF$R2X[2]),
+       title = "loadings plots on Dim.1 Dim.2") +
+  theme_light()
+
+ggplot(loadings_genes, aes(x=p3, y=p4, label=variable)) +
+  geom_point() +
+  geom_text_repel() +
+  labs(x=paste0("Dim.3 - ", PCA_genes_res@modelDF$R2X[3]),
+       y=paste0("Dim.4 - ", PCA_genes_res@modelDF$R2X[4]),
+       title = "loadings plots on Dim.3 Dim.4") +
+  theme_light()
+
+```
+
+# Unsupervised analysis of lipids dataset
+
+## Data exploration
+
+Visualize the distribution of gene expression values, to ensure comparability across lipids and preparing for multivariate analyses.
+
+-   Visualize distributions\
+-   Check normalisation
+
+```{r distrib lipids, message=FALSE, warning=FALSE}
+
+lipid.melt <- melt(nutrimouse$lipid)
+
+ggplot(lipid.melt, aes(x=value, col=variable)) +
+  geom_density() +
+  guides(col=F)
+
+scaled.lipid.melt <- melt(scale(nutrimouse$lipid))
+scaled.lipid.melt <- scaled.lipid.melt[,-1]
+colnames(scaled.lipid.melt) <- c("variable", "value")
+  
+ggplot(scaled.lipid.melt, aes(x=value, col=variable)) +
+  geom_density() +
+  guides(col=F)
+```
+
+## Principal Component Analysis
+
+Explore structure and variability in lipids block.
+
+### Compute PCA
+
+```{r pca lipids, message=FALSE, warning=FALSE}
+
+# run analysis
+PCA_lipids_res <- opls(x = nutrimouse$lipid,
+                      predI = 9,
+                      crossvalI = 7,
+                      permI = 100)
+```
+
+### Plot the explained variances
+
+-   scree plot
+
+```{r pca lipids variances, fig.align='center', message=FALSE, warning=FALSE}
+
+# saliences
+
+variances_lipids <- data.frame(variance = PCA_lipids_res@modelDF$R2X)
+variances_lipids$Dim <- rownames(variances_lipids)
+
+ggplot(variances_lipids, aes(x=Dim, y=variance)) +
+  geom_bar(stat = "identity") +
+  theme_light() +
+  labs(x = "principal components",
+       y = "percentage of explained variance",
+       title = "scree plot")
+
+```
+
+### Sample space visualization
+
+-   Plot scores: Dim.1 vs Dim.2 and Dim.3 vs Dim.4
+-   Identify main sources of variation
+
+```{r pca lipids scores, message=FALSE, warning=FALSE, fig.align='center'}
+
+scores_lipids <- data.frame(metadata, PCA_lipids_res@scoreMN)
+
+ggplot(scores_lipids, aes(x=p1, y=p2, col=diet, shape = genotype)) +
+  geom_point(size=4) +
+  labs(x=paste0("Dim.1 - ", PCA_lipids_res@modelDF$R2X[1]),
+       y=paste0("Dim.2 - ", PCA_lipids_res@modelDF$R2X[2]),
+       title = "scores plots on Dim.1 vs Dim.2") +
+  theme_light()
+
+ggplot(scores_lipids, aes(x=p3, y=p4, col=diet, shape = genotype)) +
+  geom_point(size=4) +
+  labs(x=paste0("Dim.3 - ", PCA_lipids_res@modelDF$R2X[3]),
+       y=paste0("Dim.4 - ", PCA_lipids_res@modelDF$R2X[4]),
+       title = "scores plots on Dim.3 vs Dim.4") +
+  theme_light()
+
+```
+
+### Variable contributions
+
+-   Plot loadings: Dim.1 vs Dim.2 and Dim.3 vs Dim.4
+-   Interpret biological relevance
+
+```{r pca lipids loadings, message=FALSE, warning=FALSE, fig.align='center'}
+
+loadings_lipids <- data.frame(PCA_lipids_res@loadingMN)
+loadings_lipids$variable <- rownames(loadings_lipids)
+
+ggplot(loadings_lipids, aes(x=p1, y=p2, label=variable)) +
+  geom_point() +
+  geom_text_repel() +
+  labs(x=paste0("Dim.1 - ", PCA_lipids_res@modelDF$R2X[1]),
+       y=paste0("Dim.2 - ", PCA_lipids_res@modelDF$R2X[2]),
+       title = "loadings plots on Dim.1 Dim.2") +
+  theme_light()
+
+ggplot(loadings_lipids, aes(x=p3, y=p4, label=variable)) +
+  geom_point() +
+  geom_text_repel() +
+  labs(x=paste0("Dim.3 - ", PCA_lipids_res@modelDF$R2X[3]),
+       y=paste0("Dim.4 - ", PCA_lipids_res@modelDF$R2X[4]),
+       title = "loadings plots on Dim.3 Dim.4") +
+  theme_light()
+
+```
+
+# Supervised analysis
+
+## PLS analysis between genes and lipids datasets
+
+### PLS canonical analysis
+
+-   Fit a model using mixOmics::pls explaining lipid dataset as a function of gene dataset
+
+```{r pls cano, message=FALSE, warning=FALSE}
+library(mixOmics)
+
+# run analysis
+PLS_cano_res <- pls(X=nutrimouse$gene, Y=nutrimouse$lipid, ncomp=2, scale=TRUE, mode="canonical")
+
+```
+
+#### Sample space vizualisation
+
+-   Plot scores for each of the two blocks
+-   Interpret sample distribution
+
+```{r pls cano scores, message=FALSE, warning=FALSE, fig.align='center'}
+
+PLS_cano_scores_genes <- data.frame(metadata, PLS_cano_res$variates$X)
+
+ggplot(PLS_cano_scores_genes, aes(x=comp1, y=comp2, col=diet, shape = genotype)) +
+  geom_point(size=4) +
+  labs(x=paste0("Dim.1 - ", round(PLS_cano_res$prop_expl_var$X["comp1"], 2)),
+       y=paste0("Dim.2 - ", round(PLS_cano_res$prop_expl_var$X["comp2"], 2)),
+       title = "scores plots on Dim.1 vs Dim.2 - genes") +
+  theme_light()
+
+PLS_cano_scores_lipids <- data.frame(metadata, PLS_cano_res$variates$Y)
+
+ggplot(PLS_cano_scores_lipids, aes(x=comp1, y=comp2, col=diet, shape = genotype)) +
+  geom_point(size=4) +
+  labs(x=paste0("Dim.1 - ", round(PLS_cano_res$prop_expl_var$Y["comp1"], 2)),
+       y=paste0("Dim.2 - ", round(PLS_cano_res$prop_expl_var$Y["comp2"], 2)),
+       title = "scores plots on Dim.1 vs Dim.2 - lipids") +
+  theme_light()
+
+# or with function from mixomics
+plotIndiv(PLS_cano_res)
+```
+
+#### Variable contributions
+
+-   Plot loadings: Dim.1 vs Dim.2 for each block\
+-   Interpret biological relevance
+
+```{r pls cano loadings, message=FALSE, warning=FALSE, fig.align='center'}
+
+PLS_cano_loadings_genes <- data.frame(PLS_cano_res$loadings.star[[1]])
+PLS_cano_loadings_genes$variable <- rownames(PLS_cano_loadings_genes)
+
+ggplot(PLS_cano_loadings_genes, aes(x=X1, y=X2, label=variable)) +
+  geom_point() +
+  geom_text_repel() +
+  labs(x=paste0("Dim.1 - ", round(PLS_cano_res$prop_expl_var$X["comp1"], 2)),
+       y=paste0("Dim.2 - ", round(PLS_cano_res$prop_expl_var$X["comp2"], 2)),
+       title = "loadings plots on Dim.1 Dim.2 - genes") +
+  theme_light()
+
+PLS_cano_loadings_lipids <- data.frame(PLS_cano_res$loadings.star[[2]])
+PLS_cano_loadings_lipids$variable <- rownames(PLS_cano_loadings_lipids)
+
+ggplot(PLS_cano_loadings_lipids, aes(x=X1, y=X2, label=variable)) +
+  geom_point() +
+  geom_text_repel() +
+  labs(x=paste0("Dim.1 - ", round(PLS_cano_res$prop_expl_var$Y["comp1"], 2)),
+       y=paste0("Dim.2 - ", round(PLS_cano_res$prop_expl_var$Y["comp2"], 2)),
+       title = "loadings plots on Dim.1 Dim.2 - lipids") +
+  theme_light()
+
+```
+
+### Observe the difference between the two modes *regression* and *canonical* of PLS.
+
+-   Fit a PLS model in regression mode to predict lipid dataset based on gene dataset
+
+```{r pls regression, include=TRUE, eval=TRUE, fig.show="hold"}
+
+PLS_reg_res <- pls(X=nutrimouse$gene, Y=nutrimouse$lipid, ncomp=2, scale=TRUE, mode="regression")
+
+```
+
+#### Compare sample distribution and interpret differences between both pls modes.
+
+-   Plot scores obtained with canonical and regression analyses\
+-   Compare results obtained
+
+```{r pls reg scores, message=FALSE, warning=FALSE, fig.align='center'}
+
+PLS_reg_scores_genes <- data.frame(metadata, PLS_reg_res$variates$X)
+
+ggplot(PLS_reg_scores_genes, aes(x=comp1, y=comp2, col=diet, shape = genotype)) +
+  geom_point(size=4) +
+  labs(x=paste0("Dim.1 - ", round(PLS_reg_res$prop_expl_var$X["comp1"], 2)),
+       y=paste0("Dim.2 - ", round(PLS_reg_res$prop_expl_var$X["comp2"], 2)),
+       title = "regression analysis - scores plots on Dim.1 vs Dim.2 - genes") +
+  theme_light()
+
+ggplot(PLS_cano_scores_genes, aes(x=comp1, y=comp2, col=diet, shape = genotype)) +
+  geom_point(size=4) +
+  labs(x=paste0("Dim.1 - ", round(PLS_cano_res$prop_expl_var$X["comp1"], 2)),
+       y=paste0("Dim.2 - ", round(PLS_cano_res$prop_expl_var$X["comp2"], 2)),
+       title = "canonical analysis - scores plots on Dim.1 vs Dim.2 - genes") +
+  theme_light()
+
+PLS_reg_scores_lipids <- data.frame(metadata, PLS_reg_res$variates$Y)
+
+ggplot(PLS_cano_scores_lipids, aes(x=comp1, y=comp2, col=diet, shape = genotype)) +
+  geom_point(size=4) +
+  labs(x=paste0("Dim.1 - ", round(PLS_cano_res$prop_expl_var$Y["comp1"], 2)),
+       y=paste0("Dim.2 - ", round(PLS_cano_res$prop_expl_var$Y["comp2"], 2)),title = "regression analysis - scores plots on Dim.1 vs Dim.2 - lipids") +
+  theme_light()
+
+ggplot(PLS_reg_scores_lipids, aes(x=comp1, y=comp2, col=diet, shape = genotype)) +
+  geom_point(size=4) +
+  labs(x=paste0("Dim.1 - ", round(PLS_reg_res$prop_expl_var$Y["comp1"], 2)),
+       y=paste0("Dim.2 - ", round(PLS_reg_res$prop_expl_var$Y["comp2"], 2)),
+       title = "canonical analysis - scores plots on Dim.1 vs Dim.2 - lipids") +
+  theme_light()
+
+```
+
+## PLS-DA analysis of the genes dataset
+
+Discriminate genotypes using gene expression
+
+-   Fit a PLS-DA model with ropls::opls()
+-   Evaluate the model with metrics and permutation tests
+
+```{r plsda, message=FALSE, warning=FALSE, fig.align='center'}
+
+PLSDA_genes_genotype <- opls(x = nutrimouse$gene,
+                             y = metadata$genotype,
+                             predI = NA,
+                             permI = 100)
+```
+
+### Interpretation
+
+Observe samples distribution\
+- plot scores on Dim.1 as a bar plot
+
+```{r plsda scores, message=FALSE, warning=FALSE, fig.align='center'}
+
+scores_genes_genotype <- data.frame(metadata, PLSDA_genes_genotype@scoreMN)
+
+ggplot(scores_genes_genotype, aes(x=sample_name, y=p1, fill=genotype, col = diet)) +
+  geom_bar(stat = "identity") +
+  labs(title = "scores plots on Dim.1") +
+  theme_light() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+```
+
+Interpret variables contribution\
+- plot loadings on Dim.1 as a bar plot
+
+```{r plsda loadings, message=FALSE, warning=FALSE, fig.align='center'}
+
+loadings_genes_genotype <- data.frame(PLSDA_genes_genotype@loadingMN)
+loadings_genes_genotype$variable <- rownames(loadings_genes_genotype)
+loadings_genes_genotype <- loadings_genes_genotype[order(loadings_genes_genotype$p1),]
+loadings_genes_genotype$rank <- seq(1,nrow(loadings_genes_genotype))
+
+ggplot(loadings_genes_genotype, aes(x=rank, y=p1, label=variable)) +
+  geom_bar(stat = "identity") +
+  geom_text(angle=90, size=1.5, hjust=ifelse(loadings_genes_genotype$p1 <0, 1,0)) +
+  labs(title = "loadings plots on Dim.1") +
+  theme_light()
+
+```
+
+-   identify most discriminant genes plotting VIP on Dim.1
+
+```{r plsda VIP, message=FALSE, warning=FALSE, fig.align='center'}
+
+VIP_genes_genotype <- data.frame(VIP = PLSDA_genes_genotype@vipVn)
+VIP_genes_genotype$variable <- rownames(VIP_genes_genotype)
+VIP_genes_genotype <- VIP_genes_genotype[order(VIP_genes_genotype$VIP, decreasing = T),]
+VIP_genes_genotype$rank <- seq(1,nrow(loadings_genes_genotype))
+
+ggplot(VIP_genes_genotype, aes(x=rank, y=VIP, label=variable)) +
+  geom_bar(stat = "identity") +
+  geom_text(angle=90, size=1.5, hjust=0) +
+  labs(title = "VIP plot on Dim.1") +
+  theme_light()
+
+```
+
+-   Alternative visualisation of variables contribution: plot loadings on Dim.1 vs VIP on Dim.1 (similar to a volcano plot)
+
+```{r plsda loadings VIP, message=FALSE, warning=FALSE, fig.align='center'}
+
+loadings_VIP_genes_genotype <- merge(loadings_genes_genotype[,-3], VIP_genes_genotype[,-3])
+
+ggplot(loadings_VIP_genes_genotype, aes(x=p1, y=VIP, label=variable)) +
+  geom_point() +
+  geom_text_repel(size=3) +
+  labs(title = "loadings vs VIP plot - Dim.1") +
+  theme_light()
+
+```
+
+## OPLS-DA analysis of the genes dataset
+
+Discriminate genotypes using gene expression
+
+-   Fit a PLS-DA model with ropls::opls()
+-   Evaluate the model with metrics and permutation tests
+
+```{r oplsda, message=FALSE, warning=FALSE, fig.align='center'}
+
+OPLSDA_genes_genotype <- opls(x = nutrimouse$gene,
+                             y = metadata$genotype,
+                             predI = 1,
+                             orthoI = 1,
+                             permI = 100)
+```
+
+### Interpretation
+
+Observe samples distribution\
+- plot scores on Predictive vs Orthogonal components
+
+```{r oplsda scores, message=FALSE, warning=FALSE, fig.align='center'}
+
+oplsda_scores_genes_genotype <- data.frame(metadata, p1= OPLSDA_genes_genotype@scoreMN, o1=OPLSDA_genes_genotype@orthoScoreMN)
+
+ggplot(oplsda_scores_genes_genotype, aes(x=p1, y=o1, shape=genotype, col = diet)) +
+  geom_point(size=4) +
+  labs(title = "scores plots Pred vs Ortho") +
+  theme_light() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+```
+
+Identify most discriminant genes\
+- plot loadings on Predictive vs Orthogonal components
+
+```{r oplsda loadings, message=FALSE, warning=FALSE, fig.align='center'}
+
+oplsda_loadings_genes_genotype <- data.frame(p1=OPLSDA_genes_genotype@loadingMN, o1=OPLSDA_genes_genotype@orthoLoadingMN)
+oplsda_loadings_genes_genotype$variable <- rownames(oplsda_loadings_genes_genotype)
+
+ggplot(oplsda_loadings_genes_genotype, aes(x=p1, y=o1, label=variable)) +
+  geom_point() +
+  geom_text_repel() +
+  labs(title = "loadings plots on Pred vs Ortho") +
+  theme_light()
+
+```
+
+-   plot loadings on Predictive vs VIP on Predictive component (similar to a volcano plot)
+
+```{r oplsda loadings VIP, message=FALSE, warning=FALSE, fig.align='center'}
+
+oplsda_loadings_VIP_genes_genotype <- data.frame(oplsda_loadings_genes_genotype, VIP = OPLSDA_genes_genotype@vipVn)
+
+ggplot(oplsda_loadings_VIP_genes_genotype, aes(x=p1, y=VIP, label=variable)) +
+  geom_point() +
+  geom_text_repel(size=2, max.overlaps = 25, segment.size=.2) +
+  labs(title = "loadings vs VIP plot - Dim.1") +
+  theme_light()
+
+```
