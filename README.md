@@ -58,7 +58,6 @@ You are required to bring your own laptop and have the following installed:
 #### Day 2 - Multiblock analyses
  - [`Lecture lides`](Day2/MultiOmics_Data_Integration_2026_print.pdf)
  - [`Practicals slides`](Day2/Practicals_Day_2.pdf)
- - [`Practicals scripts`](Day2/)
  - [`Script practicals unsupervised multiblock analyses`](Day2/Day2_unsupervised_multiblock_analyses.Rmd)
  - [`Script practicals supervised multiblock analyses`](Day2/Day2_supervised_multiblock_analyses.Rmd)
 
