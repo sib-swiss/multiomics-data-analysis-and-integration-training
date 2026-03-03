@@ -28,37 +28,37 @@ library(reshape2)
 
 This dataset originates from a nutrigenomic study in mice (Martin et al., 2007), designed to investigate how dietary fatty acid composition influences liver lipid profiles and hepatic gene expression.
 
-**Experimental Design**  
+**Experimental Design**
 
 Forty mice were cross-classified according to two experimental factors, each with multiple levels:
 
-- Genotype (2 levels):  
-Wild-type (WT)  
-PPARα knockout (PPARα -/-)  
+-   Genotype (2 levels):\
+    Wild-type (WT)\
+    PPARα knockout (PPARα -/-)
 
-- Diet (5 levels):
+-   Diet (5 levels):
 
-REF: Reference diet (50/50 corn and colza oils)  
-COC: Saturated fatty acid-rich diet (hydrogenated coconut oil)  
-SUN: Omega-6-rich diet (sunflower oil)  
-LIN: Omega-3-rich diet (linseed oil)  
-FISH: Mixed diet (corn/colza/enriched fish oils in 43/43/14 ratio)  
+REF: Reference diet (50/50 corn and colza oils)\
+COC: Saturated fatty acid-rich diet (hydrogenated coconut oil)\
+SUN: Omega-6-rich diet (sunflower oil)\
+LIN: Omega-3-rich diet (linseed oil)\
+FISH: Mixed diet (corn/colza/enriched fish oils in 43/43/14 ratio)
 
 Each genotype-diet combination includes four biological replicates.
 
-**Variables Collected**  
+**Variables Collected**
 
 Two sets of variables were measured for each mouse:
 
-- Gene Expression:  
+-   Gene Expression:
 
-Expression levels of 120 selected hepatic genes, chosen from ~30,000 candidates for their relevance to nutritional regulation.  
-Measured using nylon macroarrays with radioactive labeling.  
+Expression levels of 120 selected hepatic genes, chosen from \~30,000 candidates for their relevance to nutritional regulation.\
+Measured using nylon macroarrays with radioactive labeling.
 
-- Lipid Composition:  
+-   Lipid Composition:
 
-Relative concentrations (percentages) of 21 hepatic fatty acids.  
-Quantified via gas chromatography.  
+Relative concentrations (percentages) of 21 hepatic fatty acids.\
+Quantified via gas chromatography.
 
 ```{r import and format dataset, message=FALSE, warning=FALSE}
 
@@ -74,12 +74,12 @@ rownames(lipids) <- metadata$sample_name
 
 # Unsupervised analysis of genes dataset
 
-## Data exploration  
+## Data exploration
 
 Visualize the distribution of gene expression values, to ensure comparability across genes and preparing for multivariate analyses.
 
-- Visualize distributions plotting histograms of raw data and scaled data
-- Check normalisation
+-   Visualize distributions plotting histograms of raw data and scaled data
+-   Check normalisation
 
 ```{r distrib genes, message=FALSE, warning=FALSE}
 
@@ -87,9 +87,9 @@ Visualize the distribution of gene expression values, to ensure comparability ac
 
 ## Principal Component Analysis
 
-Explore structure and variability in genes block.  
+Explore structure and variability in genes block.
 
-### Compute PCA  
+### Compute PCA
 
 ```{r pca genes, message=FALSE, warning=FALSE}
 
@@ -100,7 +100,7 @@ PCA_genes_res <- opls(x = nutrimouse$gene,
 
 ### Plot the explained variances
 
-- scree plot
+-   scree plot
 
 ```{r pca genes variances, fig.align='center', message=FALSE, warning=FALSE}
 
@@ -110,8 +110,8 @@ PCA_genes_res <- opls(x = nutrimouse$gene,
 
 ### Sample space visualization
 
-- Plot scores: Dim.1 vs Dim.2 and Dim.3 vs Dim.4
-- Identify main sources of variation
+-   Plot scores: Dim.1 vs Dim.2 and Dim.3 vs Dim.4
+-   Identify main sources of variation
 
 ```{r pca genes scores, message=FALSE, warning=FALSE, fig.align='center'}
 
@@ -121,8 +121,8 @@ PCA_genes_res <- opls(x = nutrimouse$gene,
 
 ### Variable coontributions
 
-- Plot loadings: Dim.1 vs Dim.2 and Dim.3 vs Dim.4
-- Interpret biological relevance
+-   Plot loadings: Dim.1 vs Dim.2 and Dim.3 vs Dim.4
+-   Interpret biological relevance
 
 ```{r pca genes loadings, message=FALSE, warning=FALSE, fig.align='center'}
 
@@ -132,12 +132,12 @@ PCA_genes_res <- opls(x = nutrimouse$gene,
 
 # Unsupervised analysis of lipids dataset
 
-## Data exploration  
+## Data exploration
 
 Visualize the distribution of gene expression values, to ensure comparability across lipids and preparing for multivariate analyses.
 
-- Visualize distributions plotting histograms of raw data and scaled data
-- Check normalisation
+-   Visualize distributions plotting histograms of raw data and scaled data
+-   Check normalisation
 
 ```{r distrib lipids, message=FALSE, warning=FALSE}
 
@@ -145,7 +145,7 @@ Visualize the distribution of gene expression values, to ensure comparability ac
 
 ## Principal Component Analysis
 
-Explore structure and variability in lipids block.  
+Explore structure and variability in lipids block.
 
 ### Compute PCA
 
@@ -160,7 +160,7 @@ PCA_lipids_res <- opls(x = nutrimouse$lipid,
 
 ### Plot the explained variances
 
-- scree plot
+-   scree plot
 
 ```{r pca lipids variances, fig.align='center', message=FALSE, warning=FALSE}
 
@@ -172,8 +172,8 @@ PCA_lipids_res <- opls(x = nutrimouse$lipid,
 
 ### Sample space visualization
 
-- Plot scores: Dim.1 vs Dim.2 and Dim.3 vs Dim.4
-- Identify main sources of variation
+-   Plot scores: Dim.1 vs Dim.2 and Dim.3 vs Dim.4
+-   Identify main sources of variation
 
 ```{r pca lipids scores, message=FALSE, warning=FALSE, fig.align='center'}
 
@@ -183,8 +183,8 @@ PCA_lipids_res <- opls(x = nutrimouse$lipid,
 
 ### Variable contributions
 
-- Plot loadings: Dim.1 vs Dim.2 and Dim.3 vs Dim.4
-- Interpret biological relevance
+-   Plot loadings: Dim.1 vs Dim.2 and Dim.3 vs Dim.4
+-   Interpret biological relevance
 
 ```{r pca lipids loadings, message=FALSE, warning=FALSE, fig.align='center'}
 
@@ -198,7 +198,7 @@ PCA_lipids_res <- opls(x = nutrimouse$lipid,
 
 ### PLS canonical analysis
 
-- Fit a model using mixOmics::pls explaining lipid dataset as a function of gene dataset  
+-   Fit a model using mixOmics::pls explaining lipid dataset as a function of gene dataset
 
 ```{r pls cano, message=FALSE, warning=FALSE}
 library(mixOmics)
@@ -208,10 +208,10 @@ PLS_cano_res <- pls(X=nutrimouse$gene, Y=nutrimouse$lipid, ncomp=2, scale=TRUE, 
 
 ```
 
-#### Sample space vizualisation  
+#### Sample space vizualisation
 
-- Plot scores for each of the two blocks 
-- Interpret sample distribution
+-   Plot scores for each of the two blocks
+-   Interpret sample distribution
 
 ```{r pls cano scores, message=FALSE, warning=FALSE, fig.align='center'}
 
@@ -225,10 +225,10 @@ PLS_cano_res <- pls(X=nutrimouse$gene, Y=nutrimouse$lipid, ncomp=2, scale=TRUE, 
 plotIndiv(PLS_cano_res)
 ```
 
-#### Variable contributions  
+#### Variable contributions
 
-- Plot loadings: Dim.1 vs Dim.2 for each block  
-- Interpret biological relevance  
+-   Plot loadings: Dim.1 vs Dim.2 for each block\
+-   Interpret biological relevance
 
 ```{r pls cano loadings, message=FALSE, warning=FALSE, fig.align='center'}
 
@@ -240,7 +240,7 @@ plotIndiv(PLS_cano_res)
 
 ### Observe the difference between the two modes *regression* and *canonical* of PLS.
 
-- Fit a PLS model in regression mode to predict lipid dataset based on gene dataset
+-   Fit a PLS model in regression mode to predict lipid dataset based on gene dataset
 
 ```{r pls regression, include=TRUE, eval=TRUE, fig.show="hold"}
 
@@ -248,10 +248,10 @@ PLS_reg_res <- pls(X=nutrimouse$gene, Y=nutrimouse$lipid, ncomp=2, scale=TRUE, m
 
 ```
 
-#### Compare sample distribution and interpret differences between both pls modes.  
+#### Compare sample distribution and interpret differences between both pls modes.
 
-- Plot scores obtained with canonical and regression analyses  
-- Compare results obtained  
+-   Plot scores obtained with canonical and regression analyses\
+-   Compare results obtained
 
 ```{r pls reg scores, message=FALSE, warning=FALSE, fig.align='center'}
 
@@ -263,10 +263,10 @@ PLS_reg_res <- pls(X=nutrimouse$gene, Y=nutrimouse$lipid, ncomp=2, scale=TRUE, m
 
 ## PLS-DA analysis of the genes dataset
 
-Discriminate genotypes using gene expression  
+Discriminate genotypes using gene expression
 
-- Fit a PLS-DA model with ropls::opls()
-- Evaluate the model with metrics and permutation tests
+-   Fit a PLS-DA model with ropls::opls()
+-   Evaluate the model with metrics and permutation tests
 
 ```{r plsda, message=FALSE, warning=FALSE, fig.align='center'}
 
@@ -278,8 +278,8 @@ PLSDA_genes_genotype <- opls(x = nutrimouse$gene,
 
 ### Interpretation
 
-Observe samples distribution  
-- plot scores on Dim.1 as a bar plot  
+Observe samples distribution\
+- plot scores on Dim.1 as a bar plot
 
 ```{r plsda scores, message=FALSE, warning=FALSE, fig.align='center'}
 
@@ -287,8 +287,8 @@ Observe samples distribution
 
 ```
 
-Interpret variables contribution  
-- plot loadings on Dim.1 as a bar plot  
+Interpret variables contribution\
+- plot loadings on Dim.1 as a bar plot
 
 ```{r plsda loadings, message=FALSE, warning=FALSE, fig.align='center'}
 
@@ -296,7 +296,7 @@ Interpret variables contribution
 
 ```
 
-- identify most discriminant genes plotting VIP on Dim.1  
+-   identify most discriminant genes plotting VIP on Dim.1
 
 ```{r plsda VIP, message=FALSE, warning=FALSE, fig.align='center'}
 
@@ -304,18 +304,18 @@ Interpret variables contribution
 
 ```
 
-- Alternative visualisation of variables contribution: plot loadings on Dim.1 vs VIP on Dim.1 (similar to a volcano plot)
+-   Alternative visualisation of variables contribution: plot loadings on Dim.1 vs VIP on Dim.1 (similar to a volcano plot)
 
 ```{r plsda loadings VIP, message=FALSE, warning=FALSE, fig.align='center'}
 
 ```
 
-## OPLS-DA analysis of the genes dataset  
+## OPLS-DA analysis of the genes dataset
 
-Discriminate genotypes using gene expression  
+Discriminate genotypes using gene expression
 
-- Fit a PLS-DA model with ropls::opls()
-- Evaluate the model with metrics and permutation tests
+-   Fit a PLS-DA model with ropls::opls()
+-   Evaluate the model with metrics and permutation tests
 
 ```{r oplsda, message=FALSE, warning=FALSE, fig.align='center'}
 
@@ -328,7 +328,7 @@ OPLSDA_genes_genotype <- opls(x = nutrimouse$gene,
 
 ### Interpretation
 
-Observe samples distribution  
+Observe samples distribution\
 - plot scores on Predictive vs Orthogonal components
 
 ```{r oplsda scores, message=FALSE, warning=FALSE, fig.align='center'}
@@ -337,7 +337,7 @@ Observe samples distribution
 
 ```
 
-Identify most discriminant genes  
+Identify most discriminant genes\
 - plot loadings on Predictive vs Orthogonal components
 
 ```{r oplsda loadings, message=FALSE, warning=FALSE, fig.align='center'}
@@ -346,11 +346,10 @@ Identify most discriminant genes
 
 ```
 
-- plot loadings on Predictive vs VIP on Predictive component (similar to a volcano plot)
+-   plot loadings on Predictive vs VIP on Predictive component (similar to a volcano plot)
 
 ```{r oplsda loadings VIP, message=FALSE, warning=FALSE, fig.align='center'}
 
 # oplsda_loadings_VIP_genes_genotype <- data.frame(oplsda_loadings_genes_genotype, VIP = OPLSDA_genes_genotype@vipVn)
 
 ```
-
