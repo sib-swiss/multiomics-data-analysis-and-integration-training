@@ -49,7 +49,7 @@ You are required to bring your own laptop and have the following installed:
 ## Course material
 
 #### Day 1 - Dimensionality reduction
- - [`Introduction`](Day1/MultiOmics_Intro_2026_print.pdf)
+ - [`Introduction`](Day1/MultiOmics_Intro_2026.pdf)
  - [`Slides`](Day1/Dimensionality_reduction.pdf)
  - [`Practicals`](Day1/Practicals_Day_1.pdf)
 
