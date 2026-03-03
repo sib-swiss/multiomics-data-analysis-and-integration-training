@@ -49,13 +49,15 @@ You are required to bring your own laptop and have the following installed:
 ## Course material
 
 #### Day 1 - Dimensionality reduction
- - [`Introduction`](Day1/MultiOmics_Intro_2026.pdf)
- - [`Slides`](Day1/Dimensionality_reduction.pdf)
- - [`Practicals`](Day1/Practicals_Day_1.pdf)
+ - [`Introduction slides`](Day1/MultiOmics_Intro_2026.pdf)
+ - [`Lecture slides`](Day1/Dimensionality_reduction.pdf)
+ - [`Practicals slides`](Day1/Practicals_Day_1.pdf)
+ - [`Practicals scripts`](Day1/)
 
 #### Day 2 - Multiblock analyses
- - [`Slides`](Day2/MultiOmics_Data_Integration_2026_print.pdf)
- - [`Practicals`](Day2/Practicals_Day_2.pdf)
+ - [`Lecture lides`](Day2/MultiOmics_Data_Integration_2026_print.pdf)
+ - [`Practicals slides`](Day2/Practicals_Day_2.pdf)
+ - [`Practicals scripts`](Day2/)
 
 ## Feedback form
 
