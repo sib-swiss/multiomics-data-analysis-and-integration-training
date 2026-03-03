@@ -52,12 +52,15 @@ You are required to bring your own laptop and have the following installed:
  - [`Introduction slides`](Day1/MultiOmics_Intro_2026.pdf)
  - [`Lecture slides`](Day1/Dimensionality_reduction.pdf)
  - [`Practicals slides`](Day1/Practicals_Day_1.pdf)
- - [`Practicals scripts`](Day1/)
+ - [`Script practicals CCA`](Day1/Day1_CCA.Rmd)
+ - [`Script practicals single block analyses`](Day1/Day1_single_block_analyses.Rmd)
 
 #### Day 2 - Multiblock analyses
  - [`Lecture lides`](Day2/MultiOmics_Data_Integration_2026_print.pdf)
  - [`Practicals slides`](Day2/Practicals_Day_2.pdf)
  - [`Practicals scripts`](Day2/)
+ - [`Script practicals unsupervised multiblock analyses`](Day2/Day2_unsupervised_multiblock_analyses.Rmd)
+ - [`Script practicals supervised multiblock analyses`](Day2/Day2_supervised_multiblock_analyses.Rmd)
 
 ## Feedback form
 
