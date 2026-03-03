@@ -15,7 +15,7 @@ Florence Mehl <Florence.Mehl@sib.swiss> (Trainer)
 
 Van Du Tran <thuong.tran@sib.swiss> (Trainer)	 
 
-Monique Zahn  <monique.zahn@sib.swiss> (Technical Coordinator, SIB training group) 
+Gregoire Rossier  <gregoire.rossier@sib.swiss> (Technical Coordinator, SIB training group) 
 
 ## Prerequisite
 
