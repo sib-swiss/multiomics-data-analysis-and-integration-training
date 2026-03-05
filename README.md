@@ -15,7 +15,7 @@ Florence Mehl <Florence.Mehl@sib.swiss> (Trainer)
 
 Van Du Tran <thuong.tran@sib.swiss> (Trainer)	 
 
-Gregoire Rossier  <gregoire.rossier@sib.swiss> (Technical Coordinator, SIB training group) 
+Gregoire Rossier <gregoire.rossier@sib.swiss> (Technical Coordinator, SIB training group) 
 
 ## Prerequisite
 
@@ -49,13 +49,17 @@ You are required to bring your own laptop and have the following installed:
 ## Course material
 
 #### Day 1 - Dimensionality reduction
- - [`Introduction`](Day1/MultiOmics_Intro_2025_print.pdf)
- - [`Slides`](Day1/Dimensionality_reduction.pdf)
- - [`Practicals`](Day1/Practicals_Day_1.pdf)
+ - [`Introduction slides`](Day1/MultiOmics_Intro_2026.pdf)
+ - [`Lecture slides`](Day1/Dimensionality_reduction.pdf)
+ - [`Practicals slides`](Day1/Practicals_Day_1.pdf)
+ - [`Script practicals CCA`](Day1/Day1_CCA.Rmd)
+ - [`Script practicals single block analyses`](Day1/Day1_single_block_analyses.Rmd)
 
 #### Day 2 - Multiblock analyses
- - [`Slides`](Day2/MultiOmics_Data_Integration_2025_print.pdf)
- - [`Practicals`](Day2/Practicals_Day_2.pdf)
+ - [`Lecture lides`](Day2/MultiOmics_Data_Integration_2026_print.pdf)
+ - [`Practicals slides`](Day2/Practicals_Day_2.pdf)
+ - [`Script practicals unsupervised multiblock analyses`](Day2/Day2_unsupervised_multiblock_analyses.Rmd)
+ - [`Script practicals supervised multiblock analyses`](Day2/Day2_supervised_multiblock_analyses.Rmd)
 
 ## Feedback form
 
