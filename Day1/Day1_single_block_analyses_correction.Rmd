@@ -114,8 +114,8 @@ PCA_genes_res <- opls(x = nutrimouse$gene,
 ### Plot the explained variances
 
 -   scree plot
--   [Note about pcaVarVn vs [modelDF\@R2X](mailto:modelDF@R2X){.email}]{.underline}:\
-    If you want the classic PCA-style scree plot → you should use pcaVarVn. That’s the eigenvalue-based variance explained per component, and that’s what most people expect when they see a scree plot: each bar/point = % variance captured by that PC. If you want to reflect what the actual ropls model says it explains → you could use [modelDF\@R2X](mailto:modelDF@R2X){.email}, but then it’s not a scree plot in the traditional sense; it’s more like a cumulative variance plot from the model’s perspective.
+-   Note about pcaVarVn vs modelDF@R2X  
+    If you want the classic PCA-style scree plot → you should use pcaVarVn. That’s the eigenvalue-based variance explained per component, and that’s what most people expect when they see a scree plot: each bar/point = % variance captured by that PC. If you want to reflect what the actual ropls model says it explains → you could use modelDF@R2X, but then it’s not a scree plot in the traditional sense; it’s more like a cumulative variance plot from the model’s perspective.
 
 ```{r pca genes variances, fig.align='center', message=FALSE, warning=FALSE}
 
