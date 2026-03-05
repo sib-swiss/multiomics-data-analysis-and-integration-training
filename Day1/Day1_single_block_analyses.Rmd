@@ -134,7 +134,7 @@ PCA_genes_res <- opls(x = nutrimouse$gene,
 
 ## Data exploration
 
-Visualize the distribution of gene expression values, to ensure comparability across lipids and preparing for multivariate analyses.
+Visualize the distribution of lipids levels, to ensure comparability across lipids and preparing for multivariate analyses.
 
 -   Visualize distributions plotting histograms of raw data and scaled data
 -   Check normalisation

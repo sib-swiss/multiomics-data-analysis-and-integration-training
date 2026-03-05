@@ -111,7 +111,7 @@ PCA_genes_res <- opls(x = nutrimouse$gene,
                       predI = 9)
 ```
 
-### Plot the explained variances
+### Plot the explained variances #FIX this 
 
 -   scree plot
 -   Note about pcaVarVn vs modelDF@R2X  
@@ -122,7 +122,9 @@ PCA_genes_res <- opls(x = nutrimouse$gene,
 # saliences
 
 variances_genes <- data.frame(variance = PCA_genes_res@pcaVarVn)
+variances_genes_R2X <- data.frame(variance = PCA_genes_res@modelDF$R2X)
 variances_genes$Dim <- rownames(variances_genes)
+variances_genes_R2X$Dim <- rownames(variances_genes)
 
 ggplot(variances_genes, aes(x=Dim, y=variance)) +
   geom_bar(stat = "identity") +
@@ -130,6 +132,13 @@ ggplot(variances_genes, aes(x=Dim, y=variance)) +
   labs(x = "principal components",
        y = "percentage of explained variance",
        title = "scree plot")
+
+ggplot(variances_genes_R2X, aes(x=Dim, y=variance)) +
+  geom_bar(stat = "identity") +
+  theme_light() +
+  labs(x = "principal components",
+       y = "percentage of explained variance",
+       title = "scree plot R2X")
 
 ```
 
@@ -158,7 +167,7 @@ ggplot(scores_genes, aes(x=p3, y=p4, col=diet, shape = genotype)) +
 
 ```
 
-### Variable coontributions
+### Variable contributions
 
 -   Plot loadings: Dim.1 vs Dim.2 and Dim.3 vs Dim.4
 -   Interpret biological relevance
@@ -190,7 +199,7 @@ ggplot(loadings_genes, aes(x=p3, y=p4, label=variable)) +
 
 ## Data exploration
 
-Visualize the distribution of gene expression values, to ensure comparability across lipids and preparing for multivariate analyses.
+Visualize the distribution of lipids levels, to ensure comparability across lipids and preparing for multivariate analyses.
 
 -   Visualize distributions\
 -   Check normalisation
