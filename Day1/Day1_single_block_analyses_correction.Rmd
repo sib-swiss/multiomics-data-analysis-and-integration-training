@@ -111,7 +111,7 @@ PCA_genes_res <- opls(x = nutrimouse$gene,
                       predI = 9)
 ```
 
-### Plot the explained variances #FIX this 
+### Plot the explained variances
 
 -   scree plot
 -   Note about pcaVarVn vs modelDF@R2X  
@@ -130,7 +130,7 @@ ggplot(variances_genes, aes(x=Dim, y=variance)) +
   geom_bar(stat = "identity") +
   theme_light() +
   labs(x = "principal components",
-       y = "percentage of explained variance",
+       y = "explained variance",
        title = "scree plot")
 
 ggplot(variances_genes_R2X, aes(x=Dim, y=variance)) +
