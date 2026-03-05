@@ -76,14 +76,14 @@ rownames(lipids) <- metadata$sample_name
 
 # 1.Basic CCA
 
-- Perform CCA (mixOmics::rcc) between 20 genes and all lipids.
+- Perform CCA (mixOmics::rcc) between 15 genes and all lipids.
 - Investigate correlations, variable relationship and sample distribution with plots.
 
-note: The gene expression data is reduced to 20 genes so that the number of variables is less than the number of samples, to perform an unregularized CCA.
+note: The gene expression data is reduced to 15 genes so that the number of variables is less than the number of samples, to perform an unregularized CCA.
 
 ```{r selection20, echo=TRUE, message=FALSE, warning=FALSE}
 
-nutrimouse$gene_selected <- nutrimouse$gene[,1:20]
+nutrimouse$gene_selected <- nutrimouse$gene[,1:15]
 str(nutrimouse$gene_selected)
 
 ```
